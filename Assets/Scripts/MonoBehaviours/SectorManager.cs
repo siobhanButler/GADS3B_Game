@@ -2,23 +2,30 @@ using NUnit.Framework;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SectorManager : MonoBehaviour
+public class SectorManager : MonoBehaviour, IClickable
 {
-    SectorType sectorType;
-    Resource grantedResources;   //resources granted by this sector
-    int totalResources;         //total resources in this sector
+    public SectorType sectorType;
+    public Resource grantedResources;   //resources granted by this sector
+    public int totalResources;         //total resources in this sector
 
-    CountryManager country;
-    int index;                  //index of this sector in the country
+    public CountryManager country;
+    public int index;                  //index of this sector in the country
 
-    float currentInfluence;     //influence in this sector (out of 100)
+    public float currentInfluence;     //influence in this sector (out of 100)
 
-    List<KeyValuePair<PlayerManager, float>> playerInfluence;
+    public List<KeyValuePair<PlayerManager, float>> playerInfluence;
 
     List<PlayerAction> playerActions; //cards/actions played in this sector, most recent will be displayed in UI
     CardManager cardSlot1;
     CardManager cardSlot2;
 
+    [Header("Clickable Interface Settings")]
+    public Animation clickAnimation;
+    public AudioSource clickAudio;
+
+    //Propperties
+    public Animation anim => clickAnimation;
+    public AudioSource audioSource => clickAudio;
     public string sectorName => sectorType.ToString(); //name of the sector, derived from sectorType
     string description => $"This is the {index} {sectorName} sector in {country.countryName}."; //description of the sector, can be expanded later
 
@@ -47,5 +54,15 @@ public class SectorManager : MonoBehaviour
             result += playerActions[playerActions.Count - 1 - i].card.description;
         }
         return result;
+    }
+
+    public void CustomClick(ClickDetector clicker)
+    {
+        PlayerManager player = clicker.GetComponent<PlayerManager>();
+        if (player == null)
+        {
+            Debug.Log("SectorManager CustomClick(): was not clicked by a player.");
+            return;
+        }
     }
 }
