@@ -3,11 +3,20 @@ using UnityEngine;
 public class PlayerAction
 {
     ActionType actionType;
-    PlayerManager player;       //the player taking the action
+    public PlayerManager player;       //the player taking the action
     public CardManager card;    //only applicable if actionType is ActionCard
-    int turnNumber;             //the turn number this action was taken
+     
+    //int turnNumber;             //the turn number this action was taken
 
-    public string ActionMessage()
+    public void SetPlayerAction(ActionType pActionType, PlayerManager pPlayer, CardManager pCard)
+    {
+        actionType = pActionType;
+        player = pPlayer;
+        card = pCard;
+        //turnNumber = pTurnNumber;
+    }
+
+    public string GetActionMessage()
     {
         switch (actionType)
         {
@@ -18,7 +27,7 @@ public class PlayerAction
                 card = null;
                 return $"{player.playerName} crafted a card.";
             case ActionType.ActionCard:
-                return $"{player.playerName} played {card.cardName} on {card.targetSector.sectorName}.";
+                return $"{player.playerName} played {card.cardName} on {card.target.name}.";
             ;
             default:
                 return $"{player.playerName} is doing something unknown.";

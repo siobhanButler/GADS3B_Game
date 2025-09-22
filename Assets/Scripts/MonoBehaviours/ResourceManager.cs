@@ -2,6 +2,8 @@ using UnityEngine;
 
 public class ResourceManager : MonoBehaviour
 {
+    public Resource resources;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

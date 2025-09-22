@@ -49,6 +49,21 @@ public struct Resource
         );
     }
 
+    /*
+    public static Resource operator /(Resource a, int b)
+    {
+        return new Resource()
+        {
+            a.knowledge / b,
+            a.money / b,
+            a.media / b,
+            a.labour / b,
+            a.solidarity / b,
+            a.legitimacy / b
+        };
+    }
+    */
+
     // Check if we can afford a cost (all values must be >= 0 after subtraction)
     public bool CanAfford(Resource cost)
     {

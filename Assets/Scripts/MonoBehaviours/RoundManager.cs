@@ -3,6 +3,16 @@ using UnityEngine;
 
 public class RoundManager : MonoBehaviour
 {
+    // Events for notifying other systems about turn/round changes
+    public delegate void NewTurnHandler(int roundNumber, int turnNumber);
+    public static event NewTurnHandler OnNewTurn;
+
+    public delegate void NewRoundHandler(int roundNumber);
+    public static event NewRoundHandler OnNewRound;
+
+    public PlayerManager[] players;
+    public PlayerManager currentPlayer;
+
     [Header("Round Settings")]
     public int totalRounds;
     public int turnsPerRound;       //number of turns in each round, last turn is discussion phase
@@ -36,6 +46,10 @@ public class RoundManager : MonoBehaviour
         playerActions = new List<PlayerAction>[totalRounds, turnsPerRound];
         currentRound = 1;
         currentTurn = 1;
+
+        // Announce initial round and turn
+        OnNewRound?.Invoke(currentRound);
+        OnNewTurn?.Invoke(currentRound, currentTurn);
     }
 
     private void NextTurn()
@@ -60,7 +74,11 @@ public class RoundManager : MonoBehaviour
         else        //currentTurn > turnsPerRound, meaning the round is over
         {
             NextRound();
+            return;
         }
+
+        // Announce the new turn (still within the same round)
+        OnNewTurn?.Invoke(currentRound, currentTurn);
     }
 
     private void NextRound()
@@ -68,6 +86,10 @@ public class RoundManager : MonoBehaviour
         currentTurn = 1;
         currentRound++;
         //if (currentRound >= totalRounds)   //game over
+
+        // Announce new round and the first turn of that round
+        OnNewRound?.Invoke(currentRound);
+        OnNewTurn?.Invoke(currentRound, currentTurn);
     }
 
     private void SetState(RoundState newState)
