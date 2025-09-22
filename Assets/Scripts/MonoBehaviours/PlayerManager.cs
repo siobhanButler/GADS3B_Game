@@ -7,6 +7,7 @@ public class PlayerManager : MonoBehaviour
     [Header("Player Info")]
     public string playerName;
     int playerID;
+    ApproachType preferredApproach;
 
     List<PlayerAction> previousActions; //The actions that the player has taken in previous turns
 

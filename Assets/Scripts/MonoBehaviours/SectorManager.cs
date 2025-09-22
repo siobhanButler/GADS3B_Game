@@ -27,12 +27,12 @@ public class SectorManager : MonoBehaviour, IClickable
     public Animation anim => clickAnimation;
     public AudioSource audioSource => clickAudio;
     public string sectorName => sectorType.ToString(); //name of the sector, derived from sectorType
-    string description => $"This is the {index} {sectorName} sector in {country.countryName}."; //description of the sector, can be expanded later
+    string description => $"This is the {index} {sectorName} sector in {country.countryName}." + sectorType.Description; //description of the sector, can be expanded later
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        Setup();
     }
 
     // Update is called once per frame
@@ -41,7 +41,58 @@ public class SectorManager : MonoBehaviour, IClickable
         
     }
 
-    string LastPlayers(int amount)
+    void Setup()
+    {
+        // Validate that sectorType is assigned
+        if (sectorType == null)
+        {
+            Debug.LogError($"SectorManager Setup(): No SectorType assigned to {gameObject.name}!");
+            return;
+        }
+
+        // Set default total resources if not already set
+        if (totalResources <= 0) totalResources = 100; // Default base resources
+
+        // Calculate granted resources based on SectorType breakdown
+        Resource baseResource = new Resource(totalResources, totalResources, totalResources, totalResources, totalResources, totalResources);
+        grantedResources = new Resource(
+            Mathf.FloorToInt(baseResource.knowledge * sectorType.ResourceBreakdown.knowledgePercentage / 100f),
+            Mathf.FloorToInt(baseResource.money * sectorType.ResourceBreakdown.moneyPercentage / 100f),
+            Mathf.FloorToInt(baseResource.media * sectorType.ResourceBreakdown.mediaPercentage / 100f),
+            Mathf.FloorToInt(baseResource.labour * sectorType.ResourceBreakdown.labourPercentage / 100f),
+            Mathf.FloorToInt(baseResource.solidarity * sectorType.ResourceBreakdown.solidarityPercentage / 100f),
+            Mathf.FloorToInt(baseResource.legitimacy * sectorType.ResourceBreakdown.legitimacyPercentage / 100f)
+        );
+
+        // Initialize player influence list
+        if (playerInfluence == null)
+        {
+            playerInfluence = new List<KeyValuePair<PlayerManager, float>>();
+        }
+
+        // Initialize player actions list
+        if (playerActions == null)
+        {
+            playerActions = new List<PlayerAction>();
+        }
+
+        // Set default influence if not set
+        if (currentInfluence <= 0)
+        {
+            currentInfluence = 0f; // Start with no influence
+        }
+
+        // Validate resource breakdown
+        if (!sectorType.ResourceBreakdown.IsValid())
+        {
+            Debug.LogWarning($"SectorManager Setup(): Resource breakdown for {sectorType.SectorName} doesn't total 100%! " +
+                           $"Current total: {sectorType.ResourceBreakdown.GetTotalPercentage()}%");
+        }
+
+        Debug.Log($"SectorManager Setup(): {sectorType.SectorName} sector initialized with {totalResources} total resources");
+    }
+
+    string RecentActions(int amount)
     {
         string result = "";
         int count = Mathf.Min(amount, playerActions.Count);

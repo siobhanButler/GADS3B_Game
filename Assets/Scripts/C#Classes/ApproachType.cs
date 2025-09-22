@@ -1,6 +1,7 @@
 using UnityEngine;
 
-public class ApproachType
+public enum ApproachType
 {
-    
+    Peaceful,
+    Violent
 }
