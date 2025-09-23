@@ -15,9 +15,9 @@ public class SectorManager : MonoBehaviour, IClickable
 
     public List<KeyValuePair<PlayerManager, float>> playerInfluence;
 
-    List<PlayerAction> playerActions; //cards/actions played in this sector, most recent will be displayed in UI
-    CardManager cardSlot1;
-    CardManager cardSlot2;
+    public PlayerAction[] playerActions = new PlayerAction[3]; //cards/actions played in this sector, most recent will be displayed in UI
+    public CardManager cardSlot1;
+    public CardManager cardSlot2;
 
     [Header("Clickable Interface Settings")]
     public Animation clickAnimation;
@@ -73,7 +73,7 @@ public class SectorManager : MonoBehaviour, IClickable
         // Initialize player actions list
         if (playerActions == null)
         {
-            playerActions = new List<PlayerAction>();
+            playerActions = new PlayerAction[3];
         }
 
         // Set default influence if not set
@@ -95,16 +95,21 @@ public class SectorManager : MonoBehaviour, IClickable
     string RecentActions(int amount)
     {
         string result = "";
-        int count = Mathf.Min(amount, playerActions.Count);
+        int count = Mathf.Min(amount, playerActions.Length);
 
         for (int i = 0; i < count; i++)
         {
             if (i > 0) result += "\n";
-            result += playerActions[playerActions.Count - 1 - i].ActionMessage();
+            result += playerActions[playerActions.Length - 1 - i].GetActionMessage();
             result += "\n";
-            result += playerActions[playerActions.Count - 1 - i].card.description;
+            result += playerActions[playerActions.Length - 1 - i].card.description;
         }
         return result;
+    }
+
+    public void AddRecentAction(PlayerAction action)
+    {
+        //add most recent action to the index 0, move all other up by one and forget the last one
     }
 
     public void CustomClick(ClickDetector clicker)
