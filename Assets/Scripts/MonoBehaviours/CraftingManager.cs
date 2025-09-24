@@ -3,7 +3,7 @@ using UnityEngine.UI;
 
 public class CraftingManager : MonoBehaviour
 {
-    CardManager card;         //select card's class
+    CardManager card;               //select card's class
     ActionCardData actionCardData;  //data with which the new card is populated
 
     PlayerManager player;
@@ -35,6 +35,7 @@ public class CraftingManager : MonoBehaviour
         {
             //CardManager craftedCard = new cardPrefab;
             //subtract resources from player and communal resources
+            //do I need to create an instance of the card cause its a class not a mono behaviour?
             player.AddCraftedCard(card);
         }
     }

@@ -13,9 +13,7 @@ public class PlayerManager : MonoBehaviour
     List<PlayerAction> previousActions; //The actions that the player has taken in previous turns
     bool tookActionThisTurn;
 
-    [Header("Cards")]
-    List<CardManager> hand; //HandManager hand; The cards that the player posesses
-    CardManager selectedCard;
+    public HandManager handManager;
 
     [Header("Resources")]
     public Resource personalResources;
@@ -40,21 +38,23 @@ public class PlayerManager : MonoBehaviour
 
     public void SelectCard(CardManager card)
     {
-        selectedCard = card;
+        handManager.SelectCard(card);
 
         //logic to grey out all Game objects that it can not be played on
     }
 
-    public void PlayCard(CardManager card)
+    public void PlayCard(CardManager card, ICardTarget target)
     {
         PlayerAction action = new PlayerAction();
         action.SetPlayerAction(ActionType.Craft, this, card);
         previousActions.Add(action);
+
+        card.ApplyCardEffect(target, this);
     }
 
     public void AddCraftedCard(CardManager card)
     {
-        hand.Add(card);
+        handManager.AddCard(card);
 
         PlayerAction action = new PlayerAction();
         action.SetPlayerAction(ActionType.Craft, this, card);

@@ -57,11 +57,6 @@ public class UIManager : MonoBehaviour
     [SerializeField] private PlayerHandUI playerHandUI;
     
     [Header("Other Panels")]
-    [SerializeField] private GameObject playCardPanel;
-    [SerializeField] private TextMeshProUGUI playCardPromptText;
-    [SerializeField] private Image cardToPlayImage;
-    [SerializeField] private Button playCardYesButton;
-    [SerializeField] private Button playCardNoButton;
 
     // Cached resource strings to reduce allocations
     private string cachedPersonalKnowledge = "";
@@ -90,7 +85,7 @@ public class UIManager : MonoBehaviour
 
     private void Start()
     {
-        playCardPanel.SetActive(false);
+        playerHandUI.ShowPlayCardPanel(false, null, null);
         sectorUI.ShowSectorPanel(false, null);
         countryUI.ShowCountryPanel(false, null);
     }
@@ -102,7 +97,7 @@ public class UIManager : MonoBehaviour
             Debug.Log("UIManager ShowSectorUI(): sector UI is null.");
             return;
         }
-        Debug.Log($"UIManager ShowSectorUI(): Showing sector UI: {show}, Sector: {sector?.sectorName}");
+        //Debug.Log($"UIManager ShowSectorUI(): Showing sector UI: {show}, Sector: {sector?.sectorName}");
         sectorUI.ShowSectorPanel(show, sector);
     }
 
@@ -113,8 +108,19 @@ public class UIManager : MonoBehaviour
             Debug.Log("UIManager ShowCountryUI(): country UI is null.");
             return;
         }
-        Debug.Log($"UIManager ShowCountryUI(): Showing country UI: {show}, Country: {country?.countryName}");
+        //Debug.Log($"UIManager ShowCountryUI(): Showing country UI: {show}, Country: {country?.countryName}");
         countryUI.ShowCountryPanel(show, country);
+    }
+
+    public void ShowPlayCardUI(bool show, CardManager card, ICardTarget target)
+    {
+        if (playerHandUI == null)
+        {
+            Debug.Log("UIManager ShowPlayCardUI(): PlayerHandUI UI is null.");
+            return;
+        }
+        //Debug.Log($"UIManager ShowPlayCardUI(): Showing play card UI: {show}, Card: {card?.cardName}");
+        playerHandUI.ShowPlayCardPanel(show, card, target);
     }
 
     public void UpdateUIPerTurn()
@@ -291,26 +297,6 @@ public class UIManager : MonoBehaviour
             violentSlider.value = value;
     }
     
-    public void ShowPlayCardPanel(bool show, CardManager cardToPlay, CardTarget target)
-    {
-        if (playCardPanel != null)
-            playCardPanel.SetActive(show);
-
-        cardToPlayImage.sprite = cardToPlay.cardImage;
-        playCardPromptText.text = $"Are you sure you want to play {cardToPlay.cardName} on {target.name}?";
-    }
-    private void OnPlayCardYesClicked()
-    {
-        Debug.Log("Play card Yes button clicked");
-        ShowPlayCardPanel(false, null, null);
-        //currentPlayer.PlayCard();
-    }
-
-    private void OnPlayCardNoClicked()
-    {
-        Debug.Log("Play card No button clicked");
-        ShowPlayCardPanel(false, null, null);
-    }
 
     private void OnCraftButtonClicked()
     {
@@ -384,14 +370,6 @@ public class UIManager : MonoBehaviour
     {
         if(craftButton == null) craftButton = transform.Find("Craft_Button")?.GetComponent<Button>();
         if (confirmButton == null) confirmButton = transform.Find("Confirm_Button")?.GetComponent<Button>();
-
-        GameObject playPanel = transform.Find("PlayCard_Panel")?.gameObject;
-        if (playPanel != null)
-        {
-            playCardPanel = playPanel;
-            playCardYesButton = playPanel.transform.Find("Yes_Button")?.GetComponent<Button>();
-            playCardNoButton = playPanel.transform.Find("No_Button")?.GetComponent<Button>();
-        }
     }
 
     private void InitializeOtherManagers()
@@ -409,11 +387,5 @@ public class UIManager : MonoBehaviour
 
         if (confirmButton != null)
             confirmButton.onClick.AddListener(OnConfirmButtonClicked);
-
-        if (playCardYesButton != null)
-            playCardYesButton.onClick.AddListener(OnPlayCardYesClicked);
-
-        if (playCardNoButton != null)
-            playCardNoButton.onClick.AddListener(OnPlayCardNoClicked);
     }
 }

@@ -27,12 +27,11 @@ public class PlayerAction
                 card = null;
                 return $"{player.playerName} crafted a card.";
             case ActionType.ActionCard:
-                return $"{player.playerName} played {card.cardName} on {card.target.name}.";
+                return $"{player.playerName} played {card.cardName} on {card.target.TargetName}.";
             ;
             default:
                 return $"{player.playerName} is doing something unknown.";
         }
-        return null;
     }
 }
 

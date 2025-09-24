@@ -1,277 +1,206 @@
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections.Generic;
 
 public class PlayerHandUI : MonoBehaviour
 {
+    public PlayerManager currentPlayer;
+    public const int maxCards = 5;  //how many cards can be displayed
+
     [Header("Player Hand Panel")]
     [SerializeField] private GameObject playerHandPanel;
     
     [Header("Card Images")]
-    [SerializeField] private Image card1Image;
-    [SerializeField] private Image card2Image;
-    [SerializeField] private Image card3Image;
-    [SerializeField] private Image card4Image;
-    [SerializeField] private Image selectedCardImage;
+    [SerializeField] private Image card1Image;  //index 0
+    [SerializeField] private Image card2Image;  //index 1
+    [SerializeField] private Image card3Image;  //index 3
+    [SerializeField] private Image card4Image;  //index 4
+    [SerializeField] private Image selectedCardImage;   //so index 2
+    [SerializeField] private Outline selectedCardOutline;
     
     [Header("Navigation Buttons")]
     [SerializeField] private Button previousButton;
     [SerializeField] private Button nextButton;
     [SerializeField] private Button selectButton;
     
-    [Header("Hand Management")]
-    [SerializeField] private int currentSelectedIndex = 0;
-    [SerializeField] private List<Sprite> handCards = new List<Sprite>();
+    [Header("Play Card Panel")]
+    [SerializeField] private GameObject playCardPanel;
+    [SerializeField] private TextMeshProUGUI playCardPromptText;
+    [SerializeField] private Image cardToPlayImage;
+    [SerializeField] private Button playCardYesButton;
+    [SerializeField] private Button playCardNoButton;
     
-    private Image[] cardImages;
+    private int currentStartIndex;
+    
+    private List<CardManager> cardsInHand;
+    private CardManager[] cardsDisplayed = new CardManager[5];
+    private Image[] images = new Image[5];
+    private bool isCardSelected;
+
+    private CardManager cardToPlay;
+    private ICardTarget cardTarget;
     
     private void Awake()
     {
         InitializeReferences();
-        SetupCardArray();
         SetupButtonListeners();
     }
     
     private void Start()
     {
         UpdateCardDisplay();
-        UpdateSelectedCard();
+        playCardPanel.SetActive(false);
     }
-    
-    private void InitializeReferences()
+
+    private void Setup()
     {
-        playerHandPanel = transform.Find("PlayerHand_Panel")?.gameObject;
-        
-        if (playerHandPanel != null)
-        {
-            card1Image = playerHandPanel.transform.Find("Card1_Img")?.GetComponent<Image>();
-            card2Image = playerHandPanel.transform.Find("Card2_Img")?.GetComponent<Image>();
-            card3Image = playerHandPanel.transform.Find("Card3_Img")?.GetComponent<Image>();
-            card4Image = playerHandPanel.transform.Find("Card4_Img")?.GetComponent<Image>();
-            selectedCardImage = playerHandPanel.transform.Find("SelectedCard")?.GetComponent<Image>();
-            
-            previousButton = playerHandPanel.transform.Find("Button_Previous")?.GetComponent<Button>();
-            nextButton = playerHandPanel.transform.Find("Button_Next")?.GetComponent<Button>();
-            selectButton = playerHandPanel.transform.Find("Button_Select")?.GetComponent<Button>();
-        }
+        currentStartIndex = 0;
+        isCardSelected = false;
+
+        images[0] = card1Image;
+        images[1] = card2Image;
+        images[2] = selectedCardImage;
+        images[3] = card3Image;
+        images[4] = card4Image;
     }
-    
-    private void SetupCardArray()
+
+    public void UpdateHandUI(PlayerManager player)
     {
-        cardImages = new Image[] { card1Image, card2Image, card3Image, card4Image };
-    }
-    
-    private void SetupButtonListeners()
-    {
-        if (previousButton != null)
-            previousButton.onClick.AddListener(OnPreviousCardClicked);
-        
-        if (nextButton != null)
-            nextButton.onClick.AddListener(OnNextCardClicked);
-        
-        if (selectButton != null)
-            selectButton.onClick.AddListener(OnSelectCardClicked);
-    }
-    
-    public void ShowPlayerHandPanel(bool show)
-    {
-        if (playerHandPanel != null)
-            playerHandPanel.SetActive(show);
-    }
-    
-    public void SetHandCards(List<Sprite> newHandCards)
-    {
-        handCards = new List<Sprite>(newHandCards);
-        currentSelectedIndex = Mathf.Clamp(currentSelectedIndex, 0, handCards.Count - 1);
+        currentPlayer = player;
+        cardsInHand = currentPlayer.handManager.hand;   //get the cards of the new player
+
         UpdateCardDisplay();
-        UpdateSelectedCard();
     }
     
-    public void AddCardToHand(Sprite cardSprite)
+    public void ShowPlayCardPanel(bool show, CardManager card, ICardTarget target)
     {
-        if (cardSprite != null)
-        {
-            handCards.Add(cardSprite);
-            UpdateCardDisplay();
-        }
-    }
-    
-    public void RemoveCardFromHand(int index)
-    {
-        if (index >= 0 && index < handCards.Count)
-        {
-            handCards.RemoveAt(index);
+        if (playCardPanel != null)
+            playCardPanel.SetActive(show);
+
+        cardToPlay = card;
+        cardTarget = target;
+
+        if (cardToPlay != null && cardToPlayImage != null)
+            cardToPlayImage.sprite = cardToPlay.cardSprite;
             
-            if (currentSelectedIndex >= handCards.Count && handCards.Count > 0)
-                currentSelectedIndex = handCards.Count - 1;
-            else if (handCards.Count == 0)
-                currentSelectedIndex = 0;
-            
-            UpdateCardDisplay();
-            UpdateSelectedCard();
-        }
+        if (playCardPromptText != null && target != null)
+            playCardPromptText.text = $"Are you sure you want to play {cardToPlay?.cardName} on {target.TargetName}?";
     }
-    
-    public void SetCardImage(int cardIndex, Sprite cardSprite)
-    {
-        if (cardIndex >= 0 && cardIndex < cardImages.Length && cardImages[cardIndex] != null)
-        {
-            cardImages[cardIndex].sprite = cardSprite;
-        }
-    }
-    
-    public void ClearAllCards()
-    {
-        handCards.Clear();
-        currentSelectedIndex = 0;
-        UpdateCardDisplay();
-        UpdateSelectedCard();
-    }
-    
-    public void SetSelectedCardIndex(int index)
-    {
-        if (index >= 0 && index < handCards.Count)
-        {
-            currentSelectedIndex = index;
-            UpdateSelectedCard();
-        }
-    }
-    
-    public int GetSelectedCardIndex()
-    {
-        return currentSelectedIndex;
-    }
-    
-    public Sprite GetSelectedCard()
-    {
-        if (currentSelectedIndex >= 0 && currentSelectedIndex < handCards.Count)
-            return handCards[currentSelectedIndex];
-        
-        return null;
-    }
-    
-    public int GetHandSize()
-    {
-        return handCards.Count;
-    }
-    
-    public List<Sprite> GetHandCards()
-    {
-        return new List<Sprite>(handCards);
-    }
+
     
     private void UpdateCardDisplay()
     {
-        for (int i = 0; i < cardImages.Length; i++)
+        int arrayStart = Mathf.Clamp(cardsDisplayed.Length - cardsInHand.Count, 0, 5);  //if there arent enough cards, from where will they start populating
+        for (int i = 0, j = currentStartIndex; (i < cardsDisplayed.Length); i++, j++)
         {
-            if (cardImages[i] != null)
+            if(i < arrayStart)  //it has no card, so it must be deactivated
             {
-                if (i < handCards.Count && handCards[i] != null)
-                {
-                    cardImages[i].sprite = handCards[i];
-                    cardImages[i].gameObject.SetActive(true);
-                }
-                else
-                {
-                    cardImages[i].sprite = null;
-                    cardImages[i].gameObject.SetActive(false);
-                }
-            }
-        }
-        
-        UpdateNavigationButtons();
-    }
-    
-    private void UpdateSelectedCard()
-    {
-        if (selectedCardImage != null)
-        {
-            Sprite selectedSprite = GetSelectedCard();
-            if (selectedSprite != null)
-            {
-                selectedCardImage.sprite = selectedSprite;
-                selectedCardImage.gameObject.SetActive(true);
+                images[i].gameObject.SetActive(false);
             }
             else
             {
-                selectedCardImage.gameObject.SetActive(false);
+                cardsInHand[j] = cardsDisplayed[i];
+                images[i].sprite = cardsDisplayed[i].cardSprite;
+                images[i].gameObject.SetActive(true);
             }
         }
-    }
-    
-    private void UpdateNavigationButtons()
-    {
-        if (previousButton != null)
-            previousButton.interactable = handCards.Count > 1;
-        
-        if (nextButton != null)
-            nextButton.interactable = handCards.Count > 1;
-        
-        if (selectButton != null)
-            selectButton.interactable = handCards.Count > 0;
     }
     
     private void OnPreviousCardClicked()
     {
-        if (handCards.Count <= 1) return;
-        
-        currentSelectedIndex--;
-        if (currentSelectedIndex < 0)
-            currentSelectedIndex = handCards.Count - 1;
-        
-        UpdateSelectedCard();
-        
-        Debug.Log($"Previous card selected. Current index: {currentSelectedIndex}");
+        //shift all images to the right, so image1 = image0, image 2 = image1 etc
+        currentStartIndex -= 1;
+        UpdateCardDisplay();
     }
     
     private void OnNextCardClicked()
     {
-        if (handCards.Count <= 1) return;
-        
-        currentSelectedIndex++;
-        if (currentSelectedIndex >= handCards.Count)
-            currentSelectedIndex = 0;
-        
-        UpdateSelectedCard();
-        
-        Debug.Log($"Next card selected. Current index: {currentSelectedIndex}");
+        //shift all images to the left, so image1 = image2, image 2 = image 3 etc
+        currentStartIndex += 1;
+        UpdateCardDisplay();
     }
-    
+
     private void OnSelectCardClicked()
     {
-        if (handCards.Count == 0) return;
-        
-        Sprite selectedCard = GetSelectedCard();
-        if (selectedCard != null)
+        if (isCardSelected)     //Deselect card
         {
-            Debug.Log($"Card selected at index: {currentSelectedIndex}");
-            OnCardSelected(selectedCard, currentSelectedIndex);
+            currentPlayer.SelectCard(null);
+            selectedCardOutline.effectDistance = new Vector2(1, 1);
         }
+        else        //Select card
+        {
+            currentPlayer.SelectCard(cardsDisplayed[3]);
+            selectedCardOutline.effectDistance = new Vector2(3, 3);
+        }       
     }
-    
+
+    private void OnPlayCardYesClicked()
+    {
+        Debug.Log("Play card Yes button clicked");
+        ShowPlayCardPanel(false, null, null);   //hide play card
+
+        //Call PlayerManager's play card
+        currentPlayer.PlayCard(cardToPlay, cardTarget);
+    }
+
+    private void OnPlayCardNoClicked()
+    {
+        Debug.Log("Play card No button clicked");
+        ShowPlayCardPanel(false, null, null);
+    }
+
     protected virtual void OnCardSelected(Sprite selectedCard, int cardIndex)
     {
         // Override this method in derived classes or use events to handle card selection
         Debug.Log($"Card selected: {selectedCard.name} at index {cardIndex}");
     }
-    
-    public Button GetPreviousButton()
+
+    private void InitializeReferences()
     {
-        return previousButton;
+        if (playerHandPanel == null) playerHandPanel = transform.Find("PlayerHand_Panel")?.gameObject;
+
+        if (playerHandPanel != null)
+        {
+            if (card1Image == null) card1Image = playerHandPanel.transform.Find("Card1_Img")?.GetComponent<Image>();
+            if (card2Image == null) card2Image = playerHandPanel.transform.Find("Card2_Img")?.GetComponent<Image>();
+            if (card3Image == null) card3Image = playerHandPanel.transform.Find("Card3_Img")?.GetComponent<Image>();
+            if (card4Image == null) card4Image = playerHandPanel.transform.Find("Card4_Img")?.GetComponent<Image>();
+            if (selectedCardImage == null) selectedCardImage = playerHandPanel.transform.Find("SelectedCard")?.GetComponent<Image>();
+            if (selectedCardOutline == null) selectedCardOutline = selectedCardOutline.GetComponent<Outline>();
+
+            if (previousButton == null) previousButton = playerHandPanel.transform.Find("Button_Previous")?.GetComponent<Button>();
+            if (nextButton == null) nextButton = playerHandPanel.transform.Find("Button_Next")?.GetComponent<Button>();
+            if (selectButton == null) selectButton = playerHandPanel.transform.Find("Button_Select")?.GetComponent<Button>();
+        }
+
+        // Initialize play card panel references
+        if (playCardPanel == null) playCardPanel = transform.Find("PlayCard_Panel")?.gameObject;
+        if (playCardPanel != null)
+        {
+            if (playCardPromptText == null) playCardPromptText = playCardPanel.transform.Find("Prompt_Text")?.GetComponent<TextMeshProUGUI>();
+            if(cardToPlayImage == null) cardToPlayImage = playCardPanel.transform.Find("CardToPlay_Image")?.GetComponent<Image>();
+            if (cardToPlayImage == null) playCardYesButton = playCardPanel.transform.Find("Yes_Button")?.GetComponent<Button>();
+            if (cardToPlayImage == null) playCardNoButton = playCardPanel.transform.Find("No_Button")?.GetComponent<Button>();
+        }
     }
-    
-    public Button GetNextButton()
+
+    private void SetupButtonListeners()
     {
-        return nextButton;
-    }
-    
-    public Button GetSelectButton()
-    {
-        return selectButton;
-    }
-    
-    public GameObject GetPlayerHandPanel()
-    {
-        return playerHandPanel;
+        if (previousButton != null)
+            previousButton.onClick.AddListener(OnPreviousCardClicked);
+
+        if (nextButton != null)
+            nextButton.onClick.AddListener(OnNextCardClicked);
+
+        if (selectButton != null)
+            selectButton.onClick.AddListener(OnSelectCardClicked);
+
+        // Setup play card panel button listeners
+        if (playCardYesButton != null)
+            playCardYesButton.onClick.AddListener(OnPlayCardYesClicked);
+
+        if (playCardNoButton != null)
+            playCardNoButton.onClick.AddListener(OnPlayCardNoClicked);
     }
 }

@@ -4,9 +4,10 @@ using UnityEngine.XR;
 
 public class HandManager : MonoBehaviour
 {
-    [Header("Cards")]
-    List<CardManager> hand; //HandManager hand; The cards that the player posesses
-    CardManager selectedCard;
+    public PlayerManager player;
+    public List<CardManager> hand;      //The cards that the player posesses
+    public CardManager selectedCard;
+    public int maxHandSize = 5;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -27,6 +28,12 @@ public class HandManager : MonoBehaviour
         //logic to grey out all Game objects that it can not be played on
     }
 
+    public int GetCardIndex(CardManager card)
+    {
+        if (!hand.Contains(card)) return -1;
+        return hand.IndexOf(card);
+    }
+
     public void PlayCard()
     {
 
@@ -35,5 +42,15 @@ public class HandManager : MonoBehaviour
     public void AddCard(CardManager card)
     {
         hand.Add(card);
+    }
+
+    public bool CanAddCard(int cardsToAdd)
+    {
+        return (hand.Count + cardsToAdd <= maxHandSize);
+    }
+
+    public bool HasCardSelected()
+    {
+        return (selectedCard != null);
     }
 }

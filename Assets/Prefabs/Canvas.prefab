@@ -3920,17 +3920,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8333356b1db633044a31232cae1f6926, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentPlayer: {fileID: 0}
   playerHandPanel: {fileID: 2172567507851287838}
   card1Image: {fileID: 1487311661101380758}
   card2Image: {fileID: 1350682549655991956}
   card3Image: {fileID: 1112804185683282506}
   card4Image: {fileID: 6267900691061601794}
   selectedCardImage: {fileID: 925173723559961662}
+  selectedCardOutline: {fileID: 6028070953393749682}
   previousButton: {fileID: 8479605981948012784}
   nextButton: {fileID: 1227121519400563228}
   selectButton: {fileID: 5863524445487985438}
-  currentSelectedIndex: 0
-  handCards: []
+  playCardPanel: {fileID: 6719606403478458339}
+  playCardPromptText: {fileID: 3070456189458826758}
+  cardToPlayImage: {fileID: 1593436892158837217}
+  playCardYesButton: {fileID: 425084953702719745}
+  playCardNoButton: {fileID: 1848096073215983587}
 --- !u!1 &2232401892939186671
 GameObject:
   m_ObjectHideFlags: 0
@@ -7742,11 +7747,6 @@ MonoBehaviour:
   countryUI: {fileID: 6113343502227723035}
   sectorUI: {fileID: 2290302160129552029}
   playerHandUI: {fileID: 5961843333345710031}
-  playCardPanel: {fileID: 6719606403478458339}
-  playCardPromptText: {fileID: 3070456189458826758}
-  cardToPlayImage: {fileID: 1593436892158837217}
-  playCardYesButton: {fileID: 425084953702719745}
-  playCardNoButton: {fileID: 1848096073215983587}
 --- !u!1 &4436827504497974476
 GameObject:
   m_ObjectHideFlags: 0

@@ -57,6 +57,7 @@ public class SectorUI : MonoBehaviour
         UpdateSectorCards();
         UpdateRecentActions();
         UpdateSectorResources();
+        UpdateSectorInfluence();
     }
 
     public void UpdateSectorInfo()
@@ -73,8 +74,8 @@ public class SectorUI : MonoBehaviour
     public void UpdateSectorCards()
     {
         if (selectedSector == null) return;
-        if (selectedSector.cardSlot1 != null) cardSlot1Image.sprite = selectedSector.cardSlot1.cardImage;
-        if (selectedSector.cardSlot2 != null) cardSlot2Image.sprite = selectedSector.cardSlot2.cardImage;
+        if (selectedSector.cardSlot1 != null) cardSlot1Image.sprite = selectedSector.cardSlot1.cardSprite;
+        if (selectedSector.cardSlot2 != null) cardSlot2Image.sprite = selectedSector.cardSlot2.cardSprite;
     }
 
     public void UpdateRecentActions()
@@ -110,6 +111,13 @@ public class SectorUI : MonoBehaviour
                                         catch { solidarityText.text = ""; }
     }
     
+    public void UpdateSectorInfluence()
+    {
+        if (selectedSector == null) return;
+        if (sectorInfluenceSlider != null) sectorInfluenceSlider.value = selectedSector.currentInfluence;
+        sectorInfluenceSlider.fillRect.GetComponent<Image>().color = selectedSector.GetTopInfluencingPlayer().playerColor;  //set the color of the fill rect to the top influencing player's color
+    }
+
     private void InitializeReferences()
     {
         if (sectorPanel == null)

@@ -49,20 +49,49 @@ public struct Resource
         );
     }
 
-    /*
-    public static Resource operator /(Resource a, int b)
+    // Multiplication operator for scaling resources by a float value
+    public static Resource operator *(Resource a, float multiplier)
     {
-        return new Resource()
-        {
-            a.knowledge / b,
-            a.money / b,
-            a.media / b,
-            a.labour / b,
-            a.solidarity / b,
-            a.legitimacy / b
-        };
+        return new Resource(
+            Mathf.RoundToInt(a.knowledge * multiplier),
+            Mathf.RoundToInt(a.money * multiplier),
+            Mathf.RoundToInt(a.media * multiplier),
+            Mathf.RoundToInt(a.labour * multiplier),
+            Mathf.RoundToInt(a.solidarity * multiplier),
+            Mathf.RoundToInt(a.legitimacy * multiplier)
+        );
     }
-    */
+
+    // Division operator for scaling resources down by an float
+    public static Resource operator /(Resource a, float divisor)
+    {
+        if (divisor == 0)
+        {
+            Debug.LogError("Resource division by zero! Returning zero resource.");
+            return Resource.Zero;
+        }
+        
+        return new Resource(
+            Mathf.RoundToInt(a.knowledge / divisor),
+            Mathf.RoundToInt(a.money / divisor),
+            Mathf.RoundToInt(a.media / divisor),
+            Mathf.RoundToInt(a.labour / divisor),
+            Mathf.RoundToInt(a.solidarity / divisor),
+            Mathf.RoundToInt(a.legitimacy / divisor)
+        );
+    }
+
+    // Method to scale resources by a float multiplier (alternative to operator)
+    public Resource ScaleBy(float multiplier)
+    {
+        return this * multiplier;
+    }
+
+    // Method to scale resources by a percentage (0.0 to 1.0)
+    public Resource ScaleByPercentage(float percentage)
+    {
+        return this * percentage;
+    }
 
     // Check if we can afford a cost (all values must be >= 0 after subtraction)
     public bool CanAfford(Resource cost)

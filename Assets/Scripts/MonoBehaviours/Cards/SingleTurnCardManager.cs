@@ -16,9 +16,14 @@ public class SingleTurnCardManager : CardManager
         
     }
 
-    public override void ApplyCardEffect(CardTarget target, PlayerManager player)
+    void Setup()
     {
-        targetSector = target.GetComponent<SectorManager>();
+        targetType = CardTargetType.Sector;
+    }
+
+    public override void ApplyCardEffect(ICardTarget target, PlayerManager player)
+    {
+        targetSector = target.TargetSectorManager;
         if (targetSector == null)
         {
             Debug.Log("SingleTurnCardManager ApplyCardEffect(): Card can not find SectorManager");

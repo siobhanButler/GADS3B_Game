@@ -77,27 +77,38 @@ public class CountryUI : MonoBehaviour
     {
         if (selectedCountry == null) return;
         if (countryCardImage != null && selectedCountry.cardSlot != null)
-            countryCardImage.sprite = selectedCountry.cardSlot.cardImage;
+            countryCardImage.sprite = selectedCountry.cardSlot.cardSprite;
     }
 
     public void UpdateSectorInfluences()
     {
         if (selectedCountry == null) return;
 
+        //Get the sector's influence and set the slider value and fill rect color with sector's top influencing player's color
         if (governmentSectorSlider != null && selectedCountry.governmentSector != null)
             governmentSectorSlider.value = selectedCountry.governmentSector.currentInfluence;
+            try { governmentSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.governmentSector.GetTopInfluencingPlayer().playerColor; }
+                catch { governmentSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
 
         if (economicSectorSlider != null && selectedCountry.economicSector != null)
             economicSectorSlider.value = selectedCountry.economicSector.currentInfluence;
+            try { economicSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.economicSector.GetTopInfluencingPlayer().playerColor; }
+                catch { economicSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
 
         if (mediaSectorSlider != null && selectedCountry.mediaSector != null)
             mediaSectorSlider.value = selectedCountry.mediaSector.currentInfluence;
+            try { mediaSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.mediaSector.GetTopInfluencingPlayer().playerColor; }
+                catch { mediaSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
 
         if (socialSectorSlider != null && selectedCountry.socialSector != null)
             socialSectorSlider.value = selectedCountry.socialSector.currentInfluence;
+            try { socialSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.socialSector.GetTopInfluencingPlayer().playerColor; }
+                catch { socialSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
 
         if (activismSectorSlider != null && selectedCountry.activismSector != null)
             activismSectorSlider.value = selectedCountry.activismSector.currentInfluence;
+            try { activismSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.activismSector.GetTopInfluencingPlayer().playerColor; }
+                catch { activismSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
     }
 
     private void InitializeReferences()
