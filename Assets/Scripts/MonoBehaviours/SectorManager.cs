@@ -20,9 +20,9 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
     public float influenceThreshold;    //min influence until sector is influenced/claimed
     public float currentInfluence;     //influence in this sector (out of 100)
     public bool isInfluenced;          //if the sector is influenced (aka claimed)
-    public Dictionary<ApproachType, float> approachInfluence;
+    public Dictionary<ApproachType, float> approachInfluence = new Dictionary<ApproachType, float>();
 
-    public Dictionary<PlayerManager, float> playerInfluence;
+    public Dictionary<PlayerManager, float> playerInfluence = new Dictionary<PlayerManager, float>();
 
     public PlayerAction[] playerActions = new PlayerAction[3]; //cards/actions played in this sector, most recent will be displayed in UI
     public CardManager cardSlot1;
@@ -124,6 +124,15 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
         }
 
         ui.ShowSectorUI(true, this);
+
+        ICardTarget target = GetComponent<ICardTarget>();
+        if(target != null)  //if this has a cardTarget component
+        {
+            if (player.handManager.HasCardSelected() && player.handManager.selectedCard.targetType == CardTargetType.Sector)   //if a card is selected
+            {
+                ui.ShowPlayCardUI(true, player.handManager.selectedCard, target);
+            }
+        }  
     }
 
     public void AddInfluence(float influence, PlayerManager player, ApproachType approach)

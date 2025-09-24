@@ -87,6 +87,8 @@ public class CountryManager : MonoBehaviour, IClickable, ICardTarget
             return;
         }
 
+        Debug.Log("CountryManager UpdateCountryInfluence(): updating...");
+
         float weightedInfluence = 0f;
         float totalWeight = 0f;
 
@@ -166,7 +168,7 @@ public class CountryManager : MonoBehaviour, IClickable, ICardTarget
         {
             countryRenderer.material = influenceMaterials[3];
         }
-        else if (totalInfluence >= 80)
+        else //(totalInfluence >= 80)
         {
             countryRenderer.material = influenceMaterials[4];
         }
@@ -207,7 +209,7 @@ public class CountryManager : MonoBehaviour, IClickable, ICardTarget
         ICardTarget target = GetComponent<ICardTarget>();
         if(target != null)  //if this has a cardTarget component
         {
-            if (player.handManager.HasCardSelected())   //if a card is selected
+            if (player.handManager.HasCardSelected() && player.handManager.selectedCard.targetType == CardTargetType.Country)   //if a card is selected
             {
                 ui.ShowPlayCardUI(true, player.handManager.selectedCard, target);
             }

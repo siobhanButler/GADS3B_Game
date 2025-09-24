@@ -198,16 +198,42 @@ public class PlayerHandUI : MonoBehaviour
     private void OnPlayCardYesClicked()
     {
         Debug.Log("Play card Yes button clicked");
-        ShowPlayCardPanel(false, null, null);   //hide play card
+        
+        // Validate that we have the required components
+        if (currentPlayer == null)
+        {
+            Debug.LogError("PlayerHandUI.OnPlayCardYesClicked(): currentPlayer is null!");
+            return;
+        }
+        
+        if (cardToPlay == null)
+        {
+            Debug.LogError("PlayerHandUI.OnPlayCardYesClicked(): cardToPlay is null!");
+            return;
+        }
+        
+        if (cardTarget == null)
+        {
+            Debug.LogError("PlayerHandUI.OnPlayCardYesClicked(): cardTarget is null!");
+            return;
+        }
+        
+        Debug.Log($"PlayerHandUI.OnPlayCardYesClicked(): Playing card '{cardToPlay.cardName}' on target '{cardTarget.TargetName}'");
+        
+        // Store references before clearing them
+        CardManager cardToPlayCopy = cardToPlay;
+        ICardTarget cardTargetCopy = cardTarget;
+        
+        ShowPlayCardPanel(false, null, null);   //hide play card (this clears cardToPlay and cardTarget)
 
-        //Call PlayerManager's play card
-        currentPlayer.PlayCard(cardToPlay, cardTarget);
+        //Call PlayerManager's play card with the stored references
+        currentPlayer.PlayCard(cardToPlayCopy, cardTargetCopy);
     }
 
     private void OnPlayCardNoClicked()
     {
         Debug.Log("Play card No button clicked");
-        ShowPlayCardPanel(false, null, null);
+        ShowPlayCardPanel(false, cardToPlay, cardTarget);
     }
 
     protected virtual void OnCardSelected(Sprite selectedCard, int cardIndex)

@@ -45,6 +45,21 @@ public class PlayerManager : MonoBehaviour
 
     public void PlayCard(CardManager card, ICardTarget target)
     {
+        // Validate inputs
+        if (card == null)
+        {
+            Debug.LogError("PlayerManager.PlayCard(): card is null!");
+            return;
+        }
+        
+        if (target == null)
+        {
+            Debug.LogError("PlayerManager.PlayCard(): target is null!");
+            return;
+        }
+        
+        Debug.Log($"PlayerManager.PlayCard(): Playing card '{card.cardName}' on target '{target.TargetName}'");
+        
         PlayerAction action = new PlayerAction();
         action.SetPlayerAction(ActionType.Craft, this, card);
         previousActions.Add(action);
