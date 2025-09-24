@@ -1,19 +1,25 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class CraftingManager : MonoBehaviour
 {
-    CardManager card;               //select card's class
-    ActionCardData actionCardData;  //data with which the new card is populated
+    //public ECardClass cardClass;          //select card's class
+    public CardManager card;
+    public ActionCardData actionCardData;  //data with which the new card is populated
 
-    PlayerManager player;
+    public PlayerManager player;
 
     public Button craftButton;
+    public TextMeshProUGUI cardNameText;
+    public TextMeshProUGUI cardDescriptionText;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        //craftButton.onClick.AddListener(CraftCard());
+        craftButton.onClick.AddListener(CraftCard);
+        cardNameText.text = actionCardData.name;
+        cardDescriptionText.text = actionCardData.description;
     }
 
     // Update is called once per frame
@@ -24,47 +30,163 @@ public class CraftingManager : MonoBehaviour
 
     private void OnEnable()
     {
-        player = GetComponent<PlayerManager>(); //fix this to get correct player
-        //craftButton.interactable(CanCraftCard());
+        player = FindFirstObjectByType<PlayerManager>();
+        //player = GetComponent<PlayerManager>(); //fix this to get correct player
+        craftButton.interactable = CanCraftCard();
     }
 
     public void CraftCard() //attached to the button called Craft
     {
-        ApplyCostModifyer();
-        if (CanCraftCard())
+        if (!CanCraftCard())
         {
-            //CardManager craftedCard = new cardPrefab;
-            //subtract resources from player and communal resources
-            //do I need to create an instance of the card cause its a class not a mono behaviour?
-            player.AddCraftedCard(card);
+            Debug.LogWarning($"CraftingManager: Cannot craft {actionCardData.cardName} - insufficient resources");
+            return;
+        }
+
+        // Apply cost modifier before creating card
+        Resource finalCost = actionCardData.cost;
+        if (player.preferredApproach != actionCardData.approach)
+        {
+            finalCost = actionCardData.cost * 2; // Double the cost
+            Debug.Log($"CraftingManager: Cost doubled due to approach mismatch. New cost: {finalCost}");
+        }
+
+        // Deduct resources
+        DeductResources(finalCost);
+
+        // Create the appropriate card type
+        CardManager craftedCard = null;
+        switch (actionCardData.cardClass)
+        {
+            case ECardClass.LocationCard:
+                craftedCard = new LocationCardManager(actionCardData);
+                break;
+            case ECardClass.SingleTurnCard:
+                craftedCard = new SingleTurnCardManager(actionCardData);
+                break;
+            case ECardClass.MultiTurnCard:
+                craftedCard = new MultiTurnCardManager(actionCardData);
+                break;
+            default:
+                Debug.LogError($"CraftingManager: Unknown card class {actionCardData.cardClass}");
+                return;
+        }
+
+        if (craftedCard != null)
+        {
+            Debug.Log($"CraftingManager.CraftCard(): Created card '{craftedCard.cardName}' successfully");
+            // Add card to player's hand
+            player.AddCraftedCard(craftedCard);
+            Debug.Log($"CraftingManager.CraftCard(): Card '{craftedCard.cardName}' sent to player '{player.playerName}'");
+        }
+        else
+        {
+            Debug.LogError($"CraftingManager.CraftCard(): Failed to create card from {actionCardData.cardName}");
         }
     }
 
     bool CanCraftCard()
     {
-        if (card == null || player == null) return false;
+        if (actionCardData == null || player == null) return false;
 
-        //Resource minCost = card.cost / 2;
-
-        if(player.personalResources.CanAfford(card.cost) && player.sharedResources.resources.CanAfford(card.cost))
+        // Check if player can afford the card cost
+        if (player.personalResources.CanAfford(actionCardData.cost) && 
+            player.sharedResources.resources.CanAfford(actionCardData.cost))
         {
             return true;
         }
         else
         {
-            //calculate difference between sharedResources and minCost, then add that to personalResourcesCost
-            //check if personalResourceCost <= personalResources
-            //show warning that personal resources will be used
-            //return true
+            // Calculate if player can afford with both resources combined
+            Resource totalAvailable = player.personalResources + player.sharedResources.resources;
+            if (totalAvailable.CanAfford(actionCardData.cost))
+            {
+                // Show warning that personal resources will be used
+                Debug.LogWarning($"CraftingManager: Player will need to use personal resources to craft {actionCardData.cardName}");
+                return true;
+            }
             return false;
         }
     }
 
-    public void ApplyCostModifyer()
+    private void DeductResources(Resource cost)
     {
-        if (player.preferredApproach != card.approach) 
+        // Try to pay with shared resources first
+        if (player.sharedResources.resources.CanAfford(cost))
         {
-            card.cost = card.cost + card.cost;  //double the cost
+            player.sharedResources.resources.knowledge -= cost.knowledge;
+            player.sharedResources.resources.money -= cost.money;
+            player.sharedResources.resources.media -= cost.media;
+            player.sharedResources.resources.labour -= cost.labour;
+            player.sharedResources.resources.solidarity -= cost.solidarity;
+            player.sharedResources.resources.legitimacy -= cost.legitimacy;
+            Debug.Log($"CraftingManager: Deducted {cost} from shared resources");
+        }
+        else
+        {
+            // Use shared resources first, then personal
+            int remainingKnowledge = cost.knowledge;
+            int remainingMoney = cost.money;
+            int remainingMedia = cost.media;
+            int remainingLabour = cost.labour;
+            int remainingSolidarity = cost.solidarity;
+            int remainingLegitimacy = cost.legitimacy;
+            
+            // Deduct what we can from shared resources
+            if (player.sharedResources.resources.knowledge > 0)
+            {
+                int deductKnowledge = Mathf.Min(remainingKnowledge, player.sharedResources.resources.knowledge);
+                player.sharedResources.resources.knowledge -= deductKnowledge;
+                remainingKnowledge -= deductKnowledge;
+            }
+            if (player.sharedResources.resources.money > 0)
+            {
+                int deductMoney = Mathf.Min(remainingMoney, player.sharedResources.resources.money);
+                player.sharedResources.resources.money -= deductMoney;
+                remainingMoney -= deductMoney;
+            }
+            if (player.sharedResources.resources.media > 0)
+            {
+                int deductMedia = Mathf.Min(remainingMedia, player.sharedResources.resources.media);
+                player.sharedResources.resources.media -= deductMedia;
+                remainingMedia -= deductMedia;
+            }
+            if (player.sharedResources.resources.labour > 0)
+            {
+                int deductLabour = Mathf.Min(remainingLabour, player.sharedResources.resources.labour);
+                player.sharedResources.resources.labour -= deductLabour;
+                remainingLabour -= deductLabour;
+            }
+            if (player.sharedResources.resources.solidarity > 0)
+            {
+                int deductSolidarity = Mathf.Min(remainingSolidarity, player.sharedResources.resources.solidarity);
+                player.sharedResources.resources.solidarity -= deductSolidarity;
+                remainingSolidarity -= deductSolidarity;
+            }
+            if (player.sharedResources.resources.legitimacy > 0)
+            {
+                int deductLegitimacy = Mathf.Min(remainingLegitimacy, player.sharedResources.resources.legitimacy);
+                player.sharedResources.resources.legitimacy -= deductLegitimacy;
+                remainingLegitimacy -= deductLegitimacy;
+            }
+
+            // Deduct remaining from personal resources
+            player.personalResources.knowledge -= remainingKnowledge;
+            player.personalResources.money -= remainingMoney;
+            player.personalResources.media -= remainingMedia;
+            player.personalResources.labour -= remainingLabour;
+            player.personalResources.solidarity -= remainingSolidarity;
+            player.personalResources.legitimacy -= remainingLegitimacy;
+            
+            Debug.Log($"CraftingManager: Deducted remaining resources from personal: K:{remainingKnowledge}, M:{remainingMoney}, Me:{remainingMedia}, L:{remainingLabour}, S:{remainingSolidarity}, Le:{remainingLegitimacy}");
+        }
+    }
+
+    public void ApplyCostModifier()
+    {
+        if (player.preferredApproach != actionCardData.approach) 
+        {
+            actionCardData.cost = actionCardData.cost * 2;  //double the cost
         }
     }
 }

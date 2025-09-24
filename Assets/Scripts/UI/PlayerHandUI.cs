@@ -33,10 +33,10 @@ public class PlayerHandUI : MonoBehaviour
     
     private int currentStartIndex;
     
-    private List<CardManager> cardsInHand;
-    private CardManager[] cardsDisplayed = new CardManager[5];
-    private Image[] images = new Image[5];
-    private bool isCardSelected;
+    [SerializeField] private List<CardManager> cardsInHand = new List<CardManager>();
+    [SerializeField] private CardManager[] cardsDisplayed = new CardManager[5];
+    [SerializeField] private Image[] images = new Image[5];
+    [SerializeField] private bool isCardSelected;
 
     private CardManager cardToPlay;
     private ICardTarget cardTarget;
@@ -49,8 +49,14 @@ public class PlayerHandUI : MonoBehaviour
     
     private void Start()
     {
+        Setup();
         UpdateCardDisplay();
-        playCardPanel.SetActive(false);
+        playCardPanel.SetActive(false);   
+    }
+
+    private void Update()
+    {
+        
     }
 
     private void Setup()
@@ -63,6 +69,9 @@ public class PlayerHandUI : MonoBehaviour
         images[2] = selectedCardImage;
         images[3] = card3Image;
         images[4] = card4Image;
+
+        cardToPlay = null;
+        cardTarget = null;
     }
 
     public void UpdateHandUI(PlayerManager player)
@@ -91,47 +100,98 @@ public class PlayerHandUI : MonoBehaviour
     
     private void UpdateCardDisplay()
     {
-        int arrayStart = Mathf.Clamp(cardsDisplayed.Length - cardsInHand.Count, 0, 5);  //if there arent enough cards, from where will they start populating
-        for (int i = 0, j = currentStartIndex; (i < cardsDisplayed.Length); i++, j++)
+        Debug.Log($"PlayerHandUI.UpdateCardDisplay(): Updating display. Hand has {cardsInHand.Count} cards, currentStartIndex: {currentStartIndex}");
+        
+        // Clear all displayed cards first
+        for (int i = 0; i < cardsDisplayed.Length; i++)
         {
-            if(i < arrayStart)  //it has no card, so it must be deactivated
+            cardsDisplayed[i] = null;
+            if (images[i] != null)
             {
+                images[i].sprite = null;
                 images[i].gameObject.SetActive(false);
             }
-            else
+        }
+
+        if (cardsInHand.Count > 0)
+        {
+            // Calculate starting slot based on number of cards
+            int startSlot = GetStartingSlot(cardsInHand.Count);
+            Debug.Log($"PlayerHandUI.UpdateCardDisplay(): Starting slot for {cardsInHand.Count} cards: {startSlot}");
+            
+            // Fill display slots with cards from hand
+            for (int i = 0; i < cardsInHand.Count; i++)
             {
-                cardsInHand[j] = cardsDisplayed[i];
-                images[i].sprite = cardsDisplayed[i].cardSprite;
-                images[i].gameObject.SetActive(true);
+                int displaySlot = (startSlot + i) % cardsDisplayed.Length;
+                int handIndex = (currentStartIndex + i) % cardsInHand.Count;
+                
+                if (cardsInHand[handIndex] != null)
+                {
+                    cardsDisplayed[displaySlot] = cardsInHand[handIndex];
+                    if (images[displaySlot] != null)
+                    {
+                        images[displaySlot].sprite = cardsInHand[handIndex].cardSprite;
+                        images[displaySlot].gameObject.SetActive(true);
+                    }
+                    Debug.Log($"PlayerHandUI.UpdateCardDisplay(): Display slot {displaySlot} shows card '{cardsInHand[handIndex].cardName}' (hand index {handIndex})");
+                }
             }
+        }
+        
+        Debug.Log($"PlayerHandUI.UpdateCardDisplay(): Display updated. Showing {cardsInHand.Count} cards");
+    }
+
+    private int GetStartingSlot(int cardCount)
+    {
+        // Determine starting slot based on card count
+        switch (cardCount)
+        {
+            case 1: return 2; // Start in slot 2 (middle)
+            case 2: return 2; // Start in slot 2
+            case 3: return 1; // Start in slot 1
+            case 4: return 1; // Start in slot 1
+            default: return 0; // 5 or more cards start in slot 0
         }
     }
     
     private void OnPreviousCardClicked()
     {
-        //shift all images to the right, so image1 = image0, image 2 = image1 etc
-        currentStartIndex -= 1;
-        UpdateCardDisplay();
+        // Always rotate through cards
+        if (cardsInHand.Count > 0)
+        {
+            currentStartIndex = (currentStartIndex - 1 + cardsInHand.Count) % cardsInHand.Count;
+            UpdateCardDisplay();
+            Debug.Log($"PlayerHandUI.OnPreviousCardClicked(): Rotated to previous. New start index: {currentStartIndex}");
+        }
     }
     
     private void OnNextCardClicked()
     {
-        //shift all images to the left, so image1 = image2, image 2 = image 3 etc
-        currentStartIndex += 1;
-        UpdateCardDisplay();
+        // Always rotate through cards
+        if (cardsInHand.Count > 0)
+        {
+            currentStartIndex = (currentStartIndex + 1) % cardsInHand.Count;
+            UpdateCardDisplay();
+            Debug.Log($"PlayerHandUI.OnNextCardClicked(): Rotated to next. New start index: {currentStartIndex}");
+        }
     }
 
     private void OnSelectCardClicked()
     {
         if (isCardSelected)     //Deselect card
         {
-            currentPlayer.SelectCard(null);
-            selectedCardOutline.effectDistance = new Vector2(1, 1);
+            if (currentPlayer != null) currentPlayer.SelectCard(null);
+            if (selectedCardOutline != null) selectedCardOutline.effectDistance = new Vector2(1, 1);
+            isCardSelected = false;
         }
         else        //Select card
         {
-            currentPlayer.SelectCard(cardsDisplayed[3]);
-            selectedCardOutline.effectDistance = new Vector2(3, 3);
+            if (cardsDisplayed[2] != null && currentPlayer != null) // Use index 2 (selectedCardImage position)
+            {
+                currentPlayer.SelectCard(cardsDisplayed[2]);
+                if (selectedCardOutline != null) selectedCardOutline.effectDistance = new Vector2(3, 3);
+                isCardSelected = true;
+            }
         }       
     }
 

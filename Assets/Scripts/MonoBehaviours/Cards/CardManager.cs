@@ -18,6 +18,11 @@ public abstract class CardManager
     public ICardTarget target;
     public bool isRemoved;
 
+    public CardManager(ActionCardData data)
+    {
+        cardData = data;
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
@@ -35,7 +40,7 @@ public abstract class CardManager
         
     }
 
-    void SetupCardManager()
+    public void SetupCardManager()
     {
         player = null;
         target = null;
@@ -43,7 +48,7 @@ public abstract class CardManager
 
         if (cardData == null)
         {
-            Debug.Log($"CardManager Setup(): cardData is empty!");
+            Debug.LogError($"CardManager Setup(): cardData is null!");
             return;
         }
 
@@ -53,6 +58,8 @@ public abstract class CardManager
         targetType = cardData.targetType;
         approach = cardData.approach;
         cost = cardData.cost;
+
+        Debug.Log($"CardManager Setup(): Created card '{cardName}' with approach {approach}");
     }
 
     public abstract void ApplyCardEffect(ICardTarget target, PlayerManager player);  //must be overridden by subclasses

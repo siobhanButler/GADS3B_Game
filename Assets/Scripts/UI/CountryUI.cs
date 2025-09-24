@@ -70,7 +70,9 @@ public class CountryUI : MonoBehaviour
                                         catch { archetypeText.text = ""; }
         if (descriptionText != null) try { descriptionText.text = selectedCountry.description; } 
                                         catch { descriptionText.text = ""; }
-        if (countryInfluenceSlider != null) countryInfluenceSlider.value = selectedCountry.totalInfluence;
+        if (countryInfluenceSlider != null) countryInfluenceSlider.value = selectedCountry.totalInfluence / 100;
+                try { countryInfluenceSlider.fillRect.GetComponent<Image>().color = selectedCountry.GetTopInfluencingPlayer().playerColor; }
+                    catch { countryInfluenceSlider.fillRect.GetComponent<Image>().color = Color.beige; }
     }
 
     public void UpdateCountryCard()
@@ -86,27 +88,27 @@ public class CountryUI : MonoBehaviour
 
         //Get the sector's influence and set the slider value and fill rect color with sector's top influencing player's color
         if (governmentSectorSlider != null && selectedCountry.governmentSector != null)
-            governmentSectorSlider.value = selectedCountry.governmentSector.currentInfluence;
+            governmentSectorSlider.value = selectedCountry.governmentSector.currentInfluence / 100;
             try { governmentSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.governmentSector.GetTopInfluencingPlayer().playerColor; }
                 catch { governmentSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
 
         if (economicSectorSlider != null && selectedCountry.economicSector != null)
-            economicSectorSlider.value = selectedCountry.economicSector.currentInfluence;
+            economicSectorSlider.value = selectedCountry.economicSector.currentInfluence / 100;
             try { economicSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.economicSector.GetTopInfluencingPlayer().playerColor; }
                 catch { economicSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
 
         if (mediaSectorSlider != null && selectedCountry.mediaSector != null)
-            mediaSectorSlider.value = selectedCountry.mediaSector.currentInfluence;
+            mediaSectorSlider.value = selectedCountry.mediaSector.currentInfluence / 100;
             try { mediaSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.mediaSector.GetTopInfluencingPlayer().playerColor; }
                 catch { mediaSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
 
         if (socialSectorSlider != null && selectedCountry.socialSector != null)
-            socialSectorSlider.value = selectedCountry.socialSector.currentInfluence;
+            socialSectorSlider.value = selectedCountry.socialSector.currentInfluence / 100;
             try { socialSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.socialSector.GetTopInfluencingPlayer().playerColor; }
                 catch { socialSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
 
         if (activismSectorSlider != null && selectedCountry.activismSector != null)
-            activismSectorSlider.value = selectedCountry.activismSector.currentInfluence;
+            activismSectorSlider.value = selectedCountry.activismSector.currentInfluence / 100;
             try { activismSectorSlider.fillRect.GetComponent<Image>().color = selectedCountry.activismSector.GetTopInfluencingPlayer().playerColor; }
                 catch { activismSectorSlider.fillRect.GetComponent<Image>().color = Color.beige; }
     }

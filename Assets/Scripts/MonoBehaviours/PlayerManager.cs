@@ -10,7 +10,7 @@ public class PlayerManager : MonoBehaviour
     public Color playerColor;
     public ApproachType preferredApproach;
 
-    List<PlayerAction> previousActions; //The actions that the player has taken in previous turns
+    List<PlayerAction> previousActions = new List<PlayerAction>(); //The actions that the player has taken in previous turns
     bool tookActionThisTurn;
 
     public HandManager handManager;
@@ -54,10 +54,15 @@ public class PlayerManager : MonoBehaviour
 
     public void AddCraftedCard(CardManager card)
     {
+        Debug.Log($"PlayerManager.AddCraftedCard(): Adding card '{card.cardName}' to {playerName}'s hand");
         handManager.AddCard(card);
 
         PlayerAction action = new PlayerAction();
         action.SetPlayerAction(ActionType.Craft, this, card);
         previousActions.Add(action);
+        
+        Debug.Log($"PlayerManager.AddCraftedCard(): Card '{card.cardName}' successfully added. Hand now has {handManager.hand.Count} cards");
+
+        uiManager.playerHandUI.UpdateHandUI(this);
     }
 }

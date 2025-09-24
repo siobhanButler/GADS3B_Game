@@ -114,8 +114,9 @@ public class SectorUI : MonoBehaviour
     public void UpdateSectorInfluence()
     {
         if (selectedSector == null) return;
-        if (sectorInfluenceSlider != null) sectorInfluenceSlider.value = selectedSector.currentInfluence;
-        sectorInfluenceSlider.fillRect.GetComponent<Image>().color = selectedSector.GetTopInfluencingPlayer().playerColor;  //set the color of the fill rect to the top influencing player's color
+        if (sectorInfluenceSlider != null) sectorInfluenceSlider.value = selectedSector.currentInfluence / 100;
+        try { sectorInfluenceSlider.fillRect.GetComponent<Image>().color = selectedSector.GetTopInfluencingPlayer().playerColor; }  //set the color of the fill rect to the top influencing player's color
+            catch { sectorInfluenceSlider.fillRect.GetComponent<Image>().color = Color.beige; }
     }
 
     private void InitializeReferences()

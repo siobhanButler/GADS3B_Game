@@ -5,14 +5,15 @@ using UnityEngine.XR;
 public class HandManager : MonoBehaviour
 {
     public PlayerManager player;
-    public List<CardManager> hand;      //The cards that the player posesses
+    public List<CardManager> hand = new List<CardManager>();      //The cards that the player posesses
     public CardManager selectedCard;
-    public int maxHandSize = 5;
+    public int maxHandSize = 6;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        player = null;
+        selectedCard = null;
     }
 
     // Update is called once per frame
@@ -41,7 +42,19 @@ public class HandManager : MonoBehaviour
 
     public void AddCard(CardManager card)
     {
+        Debug.Log($"HandManager.AddCard(): Adding card '{card.cardName}' to hand. Current hand size: {hand.Count}");
+        
+        if (hand.Count >= maxHandSize)
+        {
+            Debug.LogWarning($"HandManager.AddCard(): Hand is full! Cannot add '{card.cardName}'. Max hand size: {maxHandSize}");
+            return;
+        }
+        
         hand.Add(card);
+        Debug.Log($"HandManager.AddCard(): Successfully added '{card.cardName}'. New hand size: {hand.Count}");
+        
+        // Log all cards in hand for debugging
+        Debug.Log($"HandManager.AddCard(): Current hand contains: {string.Join(", ", hand.ConvertAll(c => c.cardName))}");
     }
 
     public bool CanAddCard(int cardsToAdd)

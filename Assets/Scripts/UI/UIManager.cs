@@ -54,7 +54,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private MultiplayerUI multiplayerUI;
     [SerializeField] private CountryUI countryUI;
     [SerializeField] private SectorUI sectorUI;
-    [SerializeField] private PlayerHandUI playerHandUI;
+    [SerializeField] public PlayerHandUI playerHandUI;
     
     [Header("Other Panels")]
 

@@ -6,6 +6,13 @@ public class MultiTurnCardManager : CardManager
     public float influencePerTurn;
     public Resource costPerTurn;
 
+    public MultiTurnCardManager(ActionCardData data) : base(data)
+    {
+        SetupCardManager();
+        influencePerTurn = data.influencePerTurn;
+        costPerTurn = data.costPerTurn;
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Awake()
     {
@@ -41,10 +48,12 @@ public class MultiTurnCardManager : CardManager
     public override void ApplyCardEffect(ICardTarget pTarget, PlayerManager pPlayer)
     {
         player = pPlayer;
-        targetSector = target.TargetSectorManager;
+        target = pTarget;
+        targetSector = pTarget.TargetSectorManager;
         if (targetSector == null)
         {
-            Debug.Log("SingleTurnCardManager ApplyCardEffect(): Card can not find SectorManager");
+            Debug.Log("MultiTurnCardManager ApplyCardEffect(): Card can not find SectorManager");
+            return;
         }
         CardEffect();
     }

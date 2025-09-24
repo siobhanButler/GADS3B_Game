@@ -47,7 +47,7 @@ public class CountryManager : MonoBehaviour, IClickable, ICardTarget
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        
+        Setup();
     }
 
     // Update is called once per frame
