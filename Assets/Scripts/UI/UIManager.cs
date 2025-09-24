@@ -56,6 +56,10 @@ public class UIManager : MonoBehaviour
     [SerializeField] private SectorUI sectorUI;
     [SerializeField] public PlayerHandUI playerHandUI;
     
+    [Header("Crafting UI")]
+    [SerializeField] private GameObject craftingUIPanel;
+    [SerializeField] private Button closeCraftingUIButton;
+    
     [Header("Other Panels")]
 
     // Cached resource strings to reduce allocations
@@ -88,6 +92,7 @@ public class UIManager : MonoBehaviour
         playerHandUI.ShowPlayCardPanel(false, null, null);
         sectorUI.ShowSectorPanel(false, null);
         countryUI.ShowCountryPanel(false, null);
+        ShowCraftingUI(false);
     }
 
     public void ShowSectorUI(bool show, SectorManager sector)
@@ -121,6 +126,26 @@ public class UIManager : MonoBehaviour
         }
         //Debug.Log($"UIManager ShowPlayCardUI(): Showing play card UI: {show}, Card: {card?.cardName}");
         playerHandUI.ShowPlayCardPanel(show, card, target);
+    }
+
+    public void ShowCraftingUI(bool show)
+    {
+        if (craftingUIPanel == null)
+        {
+            Debug.Log("UIManager ShowCraftingUI(): Crafting UI panel is null.");
+            return;
+        }
+        
+        Debug.Log($"UIManager ShowCraftingUI(): Showing crafting UI: {show}");
+        craftingUIPanel.SetActive(show);
+        
+        // If showing crafting UI, hide other panels to avoid overlap
+        if (show)
+        {
+            ShowSectorUI(false, null);
+            ShowCountryUI(false, null);
+            ShowPlayCardUI(false, null, null);
+        }
     }
 
     public void UpdateUIPerTurn()
@@ -301,7 +326,13 @@ public class UIManager : MonoBehaviour
     private void OnCraftButtonClicked()
     {
         Debug.Log("Craft button clicked");
-        //open craft panel
+        ShowCraftingUI(true);
+    }
+    
+    private void OnCloseCraftingUIButtonClicked()
+    {
+        Debug.Log("Close crafting UI button clicked");
+        ShowCraftingUI(false);
     }
     
     private void OnConfirmButtonClicked()
@@ -370,6 +401,10 @@ public class UIManager : MonoBehaviour
     {
         if(craftButton == null) craftButton = transform.Find("Craft_Button")?.GetComponent<Button>();
         if (confirmButton == null) confirmButton = transform.Find("Confirm_Button")?.GetComponent<Button>();
+        
+        // Initialize crafting UI components
+        if (craftingUIPanel == null) craftingUIPanel = transform.Find("CraftingUI_Panel")?.gameObject;
+        if (closeCraftingUIButton == null) closeCraftingUIButton = craftingUIPanel?.transform.Find("Close_Button")?.GetComponent<Button>();
     }
 
     private void InitializeOtherManagers()
@@ -387,5 +422,8 @@ public class UIManager : MonoBehaviour
 
         if (confirmButton != null)
             confirmButton.onClick.AddListener(OnConfirmButtonClicked);
+            
+        if (closeCraftingUIButton != null)
+            closeCraftingUIButton.onClick.AddListener(OnCloseCraftingUIButtonClicked);
     }
 }

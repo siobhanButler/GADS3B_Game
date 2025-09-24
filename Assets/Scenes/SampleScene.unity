@@ -1000,6 +1000,10 @@ PrefabInstance:
       propertyPath: sharedResources
       value: 
       objectReference: {fileID: 1789173820}
+    - target: {fileID: 3577587620153272014, guid: f2247489a99da50478d25052fb9ea959, type: 3}
+      propertyPath: player
+      value: 
+      objectReference: {fileID: 1167100488}
     - target: {fileID: 4398020338650364119, guid: f2247489a99da50478d25052fb9ea959, type: 3}
       propertyPath: m_Name
       value: Canvas
@@ -1114,7 +1118,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 9135840937185448809, guid: f2247489a99da50478d25052fb9ea959, type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 230.00598
+      value: 230.0061
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
