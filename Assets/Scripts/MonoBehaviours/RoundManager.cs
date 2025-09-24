@@ -14,16 +14,18 @@ public class RoundManager : MonoBehaviour
     public PlayerManager currentPlayer;
 
     [Header("Round Settings")]
-    public int totalRounds;
-    public int turnsPerRound;       //number of turns in each round, last turn is discussion phase
-    public int craftingTurns;       //number of turns in each round where players can craft cards
+    [SerializeField] private float secondsPerRound;
+    [SerializeField] private int totalRounds;
+    [SerializeField] private int turnsPerRound;       //number of turns in each round, last turn is discussion phase
+    [SerializeField] private int craftingTurns;       //number of turns in each round where players can craft cards
 
-    int currentRound;
-    int currentTurn;
-    RoundState currentState;          //which actions are allowed in this round state
-    bool canCraft;                    //can players craft cards in this turn
-    bool canPlayActionCards;          //can players play action cards in this turn
-    bool canSpeak;                    //can players speak in this turn
+    public float currentSeconds;    //how many seconds are left
+    public int currentRound;
+    public int currentTurn;
+    public RoundState currentState;          //which actions are allowed in this round state
+    public bool canCraft;                    //can players craft cards in this turn
+    public bool canPlayActionCards;          //can players play action cards in this turn
+    public bool canSpeak;                    //can players speak in this turn
 
     List<PlayerAction>[,] playerActions;     //All actions of all players in this game session
                                              //2D array where each element stores a PlayerAction list, row = turnNumber, column = rowNumber
@@ -52,7 +54,7 @@ public class RoundManager : MonoBehaviour
         OnNewTurn?.Invoke(currentRound, currentTurn);
     }
 
-    private void NextTurn()
+    public void NextTurn()
     {
         currentTurn++;
 

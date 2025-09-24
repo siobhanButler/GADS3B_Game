@@ -54,22 +54,25 @@ public class ClickDetector : MonoBehaviour
             // Get all IClickable components on the clicked object
             IClickable[] clickableComponents = clickedObject.GetComponents<IClickable>();
             
-            // Call OnClick() on all IClickable components
+            // Call OnClick() on all IClickable components on the clicked object first
             foreach (IClickable clickable in clickableComponents)
             {
                 clickable.OnClick(this);
             }
             
-            // Also check parent objects for IClickable components
-            Transform parent = clickedObject.transform.parent;
-            while (parent != null)
+            // If no IClickable found on the clicked object, check parent objects
+            if (clickableComponents.Length == 0)
             {
-                IClickable[] parentClickables = parent.GetComponents<IClickable>();
-                foreach (IClickable clickable in parentClickables)
+                Transform parent = clickedObject.transform.parent;
+                while (parent != null)
                 {
-                    clickable.OnClick(this);
+                    IClickable[] parentClickables = parent.GetComponents<IClickable>();
+                    foreach (IClickable clickable in parentClickables)
+                    {
+                        clickable.OnClick(this);
+                    }
+                    parent = parent.parent;
                 }
-                parent = parent.parent;
             }
         }
     }

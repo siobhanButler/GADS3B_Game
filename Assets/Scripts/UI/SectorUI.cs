@@ -12,14 +12,22 @@ public class SectorUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI countryText;
     [SerializeField] private Slider sectorInfluenceSlider;
     [SerializeField] private GameObject resourcesObject;
+    [SerializeField] private Button closeSectorUIButton;
     
     [Header("Card Slots")]
     [SerializeField] private Image cardSlot1Image;      //Location card or multi-turn card can be played here
     [SerializeField] private Image cardSlot2Image;
-    
+
+    [Header("Granted Resources")]
+    [SerializeField] private TextMeshProUGUI knowledgeText;
+    [SerializeField] private TextMeshProUGUI mediaText;
+    [SerializeField] private TextMeshProUGUI legitimacyText;
+    [SerializeField] private TextMeshProUGUI moneyText;
+    [SerializeField] private TextMeshProUGUI labourText;
+    [SerializeField] private TextMeshProUGUI solidarityText;
+
     [Header("Recent Actions Panel")]
     [SerializeField] private GameObject recentActionsPanel;
-    [SerializeField] private TextMeshProUGUI sectorsText;
     [SerializeField] private TextMeshProUGUI recentAction1Text;
     [SerializeField] private TextMeshProUGUI recentAction1DescrText;
     [SerializeField] private TextMeshProUGUI recentAction2Text;
@@ -30,83 +38,138 @@ public class SectorUI : MonoBehaviour
     private void Awake()
     {
         InitializeReferences();
+        SetupButtonListeners();
     }
     
-    private void InitializeReferences()
-    {
-        sectorPanel = transform.Find("Sector_Panel")?.gameObject;
-        
-        if (sectorPanel != null)
-        {
-            sectorNameText = sectorPanel.transform.Find("SectorName_Text")?.GetComponent<TextMeshProUGUI>();
-            countryText = sectorPanel.transform.Find("Country_Text")?.GetComponent<TextMeshProUGUI>();
-            sectorInfluenceSlider = sectorPanel.transform.Find("SectorInfluence_Slider")?.GetComponent<Slider>();
-            resourcesObject = sectorPanel.transform.Find("Resources")?.gameObject;
-            
-            cardSlot1Image = sectorPanel.transform.Find("CardSlot1_Img")?.GetComponent<Image>();
-            cardSlot2Image = sectorPanel.transform.Find("CardSlot2_Img")?.GetComponent<Image>();
-            
-            InitializeRecentActionsReferences();
-        }
-    }
-    
-    private void InitializeRecentActionsReferences()
-    {
-        recentActionsPanel = sectorPanel.transform.Find("RecentActions_Panel")?.gameObject;
-        
-        if (recentActionsPanel != null)
-        {
-            sectorsText = recentActionsPanel.transform.Find("Sectors")?.GetComponent<TextMeshProUGUI>();
-            
-            Transform action1Transform = recentActionsPanel.transform.Find("RecentAction1_Text");
-            if (action1Transform != null)
-            {
-                recentAction1Text = action1Transform.GetComponent<TextMeshProUGUI>();
-                recentAction1DescrText = action1Transform.Find("RecentAction1Descr_Text")?.GetComponent<TextMeshProUGUI>();
-            }
-            
-            Transform action2Transform = recentActionsPanel.transform.Find("RecentAction2_Text");
-            if (action2Transform != null)
-            {
-                recentAction2Text = action2Transform.GetComponent<TextMeshProUGUI>();
-                recentAction2DescrText = action2Transform.Find("RecentAction2Descr_Text")?.GetComponent<TextMeshProUGUI>();
-            }
-            
-            Transform action3Transform = recentActionsPanel.transform.Find("RecentAction3_Text");
-            if (action3Transform != null)
-            {
-                recentAction3Text = action3Transform.GetComponent<TextMeshProUGUI>();
-                recentAction3DescrText = action3Transform.Find("RecentAction3Descr_Text")?.GetComponent<TextMeshProUGUI>();
-            }
-        }
-    }
-    
-    public void ShowSectorPanel(bool show)
+    public void ShowSectorPanel(bool show, SectorManager sector)
     {
         if (sectorPanel != null)
             sectorPanel.SetActive(show);
+        selectedSector = sector;
+        UpdateSectorUI();
     }
 
     public void UpdateSectorUI()
     {
         if (selectedSector == null) return;
 
-        sectorNameText.text = selectedSector.sectorName;
-        countryText.text = selectedSector.country.countryName;
-        sectorInfluenceSlider.value = selectedSector.currentInfluence;
-
-        if (selectedSector.cardSlot1 != null) cardSlot1Image.sprite = selectedSector.cardSlot1.cardImage;
-        if (selectedSector.cardSlot2 != null) cardSlot2Image.sprite = selectedSector.cardSlot2.cardImage;
-
-        recentAction1Text.text = selectedSector.playerActions[0].GetActionMessage();
-        recentAction1DescrText.text = selectedSector.playerActions[0].card.description;
-        recentAction2Text.text = selectedSector.playerActions[1].GetActionMessage();
-        recentAction2DescrText.text = selectedSector.playerActions[1].card.description;
-        recentAction3Text.text = selectedSector.playerActions[2].GetActionMessage();
-        recentAction3DescrText.text = selectedSector.playerActions[2].card.description;
+        UpdateSectorInfo();
+        UpdateSectorCards();
+        UpdateRecentActions();
+        UpdateSectorResources();
     }
 
-    public void SetSectorName(string sectorName)
+    public void UpdateSectorInfo()
+    {
+        if (selectedSector == null) return;
+        try { sectorNameText.text = selectedSector.sectorName; }
+            catch { sectorNameText.text = ""; }
+        try { countryText.text = selectedSector.country.countryName; }
+            catch { countryText.text = ""; }
+        try { sectorInfluenceSlider.value = selectedSector.currentInfluence; }
+            catch { sectorInfluenceSlider.value = 0;}
+    }
+
+    public void UpdateSectorCards()
+    {
+        if (selectedSector == null) return;
+        if (selectedSector.cardSlot1 != null) cardSlot1Image.sprite = selectedSector.cardSlot1.cardImage;
+        if (selectedSector.cardSlot2 != null) cardSlot2Image.sprite = selectedSector.cardSlot2.cardImage;
+    }
+
+    public void UpdateRecentActions()
+    {
+        if (selectedSector == null) return;
+        try { recentAction1Text.text = selectedSector.playerActions[0].GetActionMessage(); }
+            catch { recentAction1Text.text = ""; }
+        try { recentAction1DescrText.text = selectedSector.playerActions[0].card.description; } 
+            catch { recentAction1DescrText.text = ""; }
+        try { recentAction2Text.text = selectedSector.playerActions[1].GetActionMessage(); } 
+            catch { recentAction2Text.text = ""; }
+        try { recentAction2DescrText.text = selectedSector.playerActions[1].card.description; } 
+            catch { recentAction2DescrText.text = ""; }
+        try { recentAction3Text.text = selectedSector.playerActions[2].GetActionMessage(); } 
+            catch { recentAction3Text.text = ""; }
+        try { recentAction3DescrText.text = selectedSector.playerActions[2].card.description; } 
+            catch { recentAction3DescrText.text = ""; }
+    }
+    public void UpdateSectorResources()
+    {
+        if (selectedSector == null) return;
+        if (knowledgeText != null) try { knowledgeText.text = selectedSector.grantedResources.knowledge.ToString(); } 
+                                    catch { knowledgeText.text = ""; }
+        if (mediaText != null) try { mediaText.text = selectedSector.grantedResources.media.ToString(); } 
+                                    catch { mediaText.text = ""; }
+        if (legitimacyText != null) try { legitimacyText.text = selectedSector.grantedResources.legitimacy.ToString(); } 
+                                        catch { legitimacyText.text = ""; }
+        if (moneyText != null) try { moneyText.text = selectedSector.grantedResources.money.ToString(); } 
+                                    catch { moneyText.text = ""; }
+        if (labourText != null) try { labourText.text = selectedSector.grantedResources.labour.ToString(); } 
+                                    catch { labourText.text = ""; }
+        if (solidarityText != null) try { solidarityText.text = selectedSector.grantedResources.solidarity.ToString(); } 
+                                        catch { solidarityText.text = ""; }
+    }
+    
+    private void InitializeReferences()
+    {
+        if (sectorPanel == null)
+            sectorPanel = transform.Find("Sector_Panel")?.gameObject;
+
+        if (sectorPanel != null)
+        {
+            if (sectorNameText == null) sectorNameText = sectorPanel.transform.Find("SectorName_Text")?.GetComponent<TextMeshProUGUI>();
+            if (countryText == null) countryText = sectorPanel.transform.Find("Country_Text")?.GetComponent<TextMeshProUGUI>();
+            if (sectorInfluenceSlider == null) sectorInfluenceSlider = sectorPanel.transform.Find("SectorInfluence_Slider")?.GetComponent<Slider>();
+            if (resourcesObject == null) resourcesObject = sectorPanel.transform.Find("Resources")?.gameObject;
+
+            if (cardSlot1Image == null) cardSlot1Image = sectorPanel.transform.Find("CardSlot1_Img")?.GetComponent<Image>();
+            if (cardSlot2Image == null) cardSlot2Image = sectorPanel.transform.Find("CardSlot2_Img")?.GetComponent<Image>();
+            if (closeSectorUIButton == null) closeSectorUIButton = sectorPanel.transform.Find("CloseSectorUI_Button")?.GetComponent<Button>();
+
+            //InitializeRecentActionsReferences
+            if (recentActionsPanel == null) recentActionsPanel = sectorPanel.transform.Find("RecentActions_Panel")?.gameObject;
+
+            if (recentActionsPanel != null)
+            {
+                Transform action1Transform = recentActionsPanel.transform.Find("RecentAction1_Text");
+                if (action1Transform != null)
+                {
+                    if (recentAction1Text == null) recentAction1Text = action1Transform.GetComponent<TextMeshProUGUI>();
+                    if (recentAction1DescrText == null) recentAction1DescrText = action1Transform.Find("RecentAction1Descr_Text")?.GetComponent<TextMeshProUGUI>();
+                }
+
+                Transform action2Transform = recentActionsPanel.transform.Find("RecentAction2_Text");
+                if (action2Transform != null)
+                {
+                    if (recentAction2Text == null) recentAction2Text = action2Transform.GetComponent<TextMeshProUGUI>();
+                    if (recentAction2DescrText == null) recentAction2DescrText = action2Transform.Find("RecentAction2Descr_Text")?.GetComponent<TextMeshProUGUI>();
+                }
+
+                Transform action3Transform = recentActionsPanel.transform.Find("RecentAction3_Text");
+                if (action3Transform != null)
+                {
+                    if (recentAction3Text == null) recentAction3Text = action3Transform.GetComponent<TextMeshProUGUI>();
+                    if (recentAction3DescrText == null) recentAction3DescrText = action3Transform.Find("RecentAction3Descr_Text")?.GetComponent<TextMeshProUGUI>();
+                }
+            }
+        }
+    }
+
+    private void SetupButtonListeners()
+    {
+        if (closeSectorUIButton != null)
+            closeSectorUIButton.onClick.AddListener(OnCloseSectorUIClicked);
+    }
+
+    private void OnCloseSectorUIClicked()
+    {
+        Debug.Log("Close Sector UI button clicked");
+        ShowSectorPanel(false, null);
+    }
+}
+
+/*
+        public void SetSectorName(string sectorName)
     {
         if (sectorNameText != null)
             sectorNameText.text = sectorName;
@@ -153,7 +216,7 @@ public class SectorUI : MonoBehaviour
         if (resourcesObject != null)
             resourcesObject.SetActive(show);
     }
-    
+
     public void SetRecentAction1(string actionTitle, string actionDescription)
     {
         if (recentAction1Text != null)
@@ -206,12 +269,6 @@ public class SectorUI : MonoBehaviour
             recentActionsPanel.SetActive(show);
     }
     
-    public void SetSectorsText(string sectorsInfo)
-    {
-        if (sectorsText != null)
-            sectorsText.text = sectorsInfo;
-    }
-    
     public float GetSectorInfluence()
     {
         return sectorInfluenceSlider != null ? sectorInfluenceSlider.value : 0f;
@@ -246,4 +303,5 @@ public class SectorUI : MonoBehaviour
     {
         return cardSlot2Image;
     }
-}
+ 
+ */

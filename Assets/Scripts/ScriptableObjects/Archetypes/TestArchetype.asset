@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 91b262d6858324d45b27c694faff0439, type: 3}
+  m_Name: TestArchetype
+  m_EditorClassIdentifier: 
+  archetypeName: Test Archetype
+  description: This is a test that does something
+  colour: {r: 0.9169811, g: 0, b: 0, a: 0}
+  sectorWeights:
+    government: 0
+    media: 0
+    economic: 0
+    social: 0
+    activism: 0
+  approachEffectiveness:
+    government: 0
+    media: 0
+    economic: 0
+    social: 0
+    activism: 0
+    universal: 0
+  notes: 

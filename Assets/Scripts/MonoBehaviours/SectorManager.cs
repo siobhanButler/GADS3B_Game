@@ -24,8 +24,8 @@ public class SectorManager : MonoBehaviour, IClickable
     public AudioSource clickAudio;
 
     //Propperties
-    public Animation anim => clickAnimation;
-    public AudioSource audioSource => clickAudio;
+    //public Animation anim => clickAnimation;
+    //public AudioSource audioSource => clickAudio;
     public string sectorName => sectorType.ToString(); //name of the sector, derived from sectorType
     string description => $"This is the {index} {sectorName} sector in {country.countryName}." + sectorType.Description; //description of the sector, can be expanded later
 
@@ -65,22 +65,13 @@ public class SectorManager : MonoBehaviour, IClickable
         );
 
         // Initialize player influence list
-        if (playerInfluence == null)
-        {
-            playerInfluence = new List<KeyValuePair<PlayerManager, float>>();
-        }
+        if (playerInfluence == null) playerInfluence = new List<KeyValuePair<PlayerManager, float>>();
 
         // Initialize player actions list
-        if (playerActions == null)
-        {
-            playerActions = new PlayerAction[3];
-        }
+        if (playerActions == null) playerActions = new PlayerAction[3];
 
         // Set default influence if not set
-        if (currentInfluence <= 0)
-        {
-            currentInfluence = 0f; // Start with no influence
-        }
+        if (currentInfluence <= 0) currentInfluence = 0f; // Start with no influence
 
         // Validate resource breakdown
         if (!sectorType.ResourceBreakdown.IsValid())
@@ -110,6 +101,9 @@ public class SectorManager : MonoBehaviour, IClickable
     public void AddRecentAction(PlayerAction action)
     {
         //add most recent action to the index 0, move all other up by one and forget the last one
+        playerActions[2] = playerActions[1];
+        playerActions[1] = playerActions[0];
+        playerActions[0] = action; 
     }
 
     public void CustomClick(ClickDetector clicker)
@@ -120,5 +114,15 @@ public class SectorManager : MonoBehaviour, IClickable
             Debug.Log("SectorManager CustomClick(): was not clicked by a player.");
             return;
         }
+
+        UIManager ui = clicker.GetComponentInChildren<UIManager>();
+        if (ui == null) ui = player.uiManager;
+        if (ui == null) 
+        {
+            Debug.Log("SectorManager CustomClick(): Can not find ui manager.");
+            return;
+        }
+
+        ui.ShowSectorUI(true, this);
     }
 }

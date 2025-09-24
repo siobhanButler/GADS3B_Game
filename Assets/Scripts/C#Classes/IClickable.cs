@@ -12,14 +12,14 @@ public interface IClickable
     public void CustomClick() {}
     */
 
-    public Animation anim { get; }
-    public AudioSource audioSource { get; }
+    //public Animation anim { get; }
+    //public AudioSource audioSource { get; }
 
     /// Called when this object is clicked. Plays animation and sound, then calls CustomClick.
     public void OnClick(ClickDetector clicker)
     {
-        anim.Play();
-        audioSource.Play();
+        //anim.Play();
+        //audioSource.Play();
 
         CustomClick(clicker);
     }

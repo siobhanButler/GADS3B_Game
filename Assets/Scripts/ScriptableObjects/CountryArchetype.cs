@@ -15,8 +15,8 @@ public class CountryArchetype : ScriptableObject
     [Header("Sector Weights (1-5 scale)")]
     [SerializeField] private SectorWeights sectorWeights;
     
-    [Header("Approach Effectiveness (1-5 scale)")]
-    [SerializeField] private ApproachEffectiveness approachEffectiveness;
+    //[Header("Approach Effectiveness (1-5 scale)")]
+    //[SerializeField] private ApproachType effectiveApproach;
     
     [Header("Notes")]
     [SerializeField] private string notes;
@@ -26,7 +26,6 @@ public class CountryArchetype : ScriptableObject
     public string Description => description;
     public Color Colour => colour;
     public SectorWeights SectorWeights => sectorWeights;
-    public ApproachEffectiveness ApproachEffectiveness => approachEffectiveness;
     public string Notes => notes;
     
     /// <summary>
@@ -41,23 +40,6 @@ public class CountryArchetype : ScriptableObject
             case ESectorType.Economic: return sectorWeights.economic;
             case ESectorType.Social: return sectorWeights.social;
             case ESectorType.Activism: return sectorWeights.activism;
-            default: return 1;
-        }
-    }
-    
-    /// <summary>
-    /// Gets the effectiveness for a specific approach type
-    /// </summary>
-    public int GetApproachEffectiveness(ESectorType approachType)
-    {
-        switch (approachType)
-        {
-            case ESectorType.Government: return approachEffectiveness.government;
-            case ESectorType.Media: return approachEffectiveness.media;
-            case ESectorType.Economic: return approachEffectiveness.economic;
-            case ESectorType.Social: return approachEffectiveness.social;
-            case ESectorType.Activism: return approachEffectiveness.activism;
-            case ESectorType.Universal: return approachEffectiveness.universal;
             default: return 1;
         }
     }
@@ -90,36 +72,5 @@ public struct SectorWeights
     public float GetAverageWeight()
     {
         return GetTotalWeight() / 5f;
-    }
-}
-
-/// <summary>
-/// Defines approach effectiveness for different country archetypes (1-5 scale)
-/// </summary>
-[System.Serializable]
-public struct ApproachEffectiveness
-{
-    [Header("Approach Effectiveness (1-5 scale)")]
-    [Range(1, 5)] public int government;
-    [Range(1, 5)] public int media;
-    [Range(1, 5)] public int economic;
-    [Range(1, 5)] public int social;
-    [Range(1, 5)] public int activism;
-    [Range(1, 5)] public int universal;
-    
-    /// <summary>
-    /// Gets the total effectiveness for validation
-    /// </summary>
-    public int GetTotalEffectiveness()
-    {
-        return government + media + economic + social + activism + universal;
-    }
-    
-    /// <summary>
-    /// Gets the average effectiveness
-    /// </summary>
-    public float GetAverageEffectiveness()
-    {
-        return GetTotalEffectiveness() / 6f;
     }
 }

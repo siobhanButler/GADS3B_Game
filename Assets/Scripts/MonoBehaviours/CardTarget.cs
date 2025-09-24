@@ -46,17 +46,13 @@ public class CardTarget : MonoBehaviour
         {
             case CardTargetType.Sector:
                 return GetComponent<SectorManager>() != null;  //if null -> false, !null -> true
-                break;
             case CardTargetType.Country:
                 return GetComponent<CountryManager>() != null;  //if null -> false, !null -> true
-                break;
             case CardTargetType.Player:
                 return false;
-                break;
             default:
                 Debug.Log("Something not right");
                 return false;
-                break;
         }
     }
 

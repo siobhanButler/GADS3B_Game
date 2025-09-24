@@ -1,9 +1,18 @@
+using TMPro;
+using TreeEditor;
+using Unity.Burst.Intrinsics;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
+using static UnityEngine.GraphicsBuffer;
 
 public class UIManager : MonoBehaviour
 {
+    public GameManager gameManager;
+    public RoundManager roundManager;
+    public Resource personalResources;
+    public ResourceManager sharedResources;
+    private PlayerManager currentPlayer;
+
     [Header("Top Panel References")]
     [SerializeField] private GameObject topPanel;
     [SerializeField] private GameObject personalResourcesPanel;
@@ -11,7 +20,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private GameObject timerPanel;
     [SerializeField] private GameObject winConditionsPanel;
     [SerializeField] private Image playerImage;
-    
+
     [Header("Personal Resources")]
     [SerializeField] private TextMeshProUGUI personalKnowledgeText;
     [SerializeField] private TextMeshProUGUI personalMediaText;
@@ -19,7 +28,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI personalMoneyText;
     [SerializeField] private TextMeshProUGUI personalLabourText;
     [SerializeField] private TextMeshProUGUI personalSolidarityText;
-    
+
     [Header("Shared Resources")]
     [SerializeField] private TextMeshProUGUI sharedKnowledgeText;
     [SerializeField] private TextMeshProUGUI sharedMediaText;
@@ -49,144 +58,225 @@ public class UIManager : MonoBehaviour
     
     [Header("Other Panels")]
     [SerializeField] private GameObject playCardPanel;
+    [SerializeField] private TextMeshProUGUI playCardPromptText;
+    [SerializeField] private Image cardToPlayImage;
     [SerializeField] private Button playCardYesButton;
     [SerializeField] private Button playCardNoButton;
+
+    // Cached resource strings to reduce allocations
+    private string cachedPersonalKnowledge = "";
+    private string cachedPersonalMedia = "";
+    private string cachedPersonalLegitimacy = "";
+    private string cachedPersonalMoney = "";
+    private string cachedPersonalLabour = "";
+    private string cachedPersonalSolidarity = "";
+    
+    private string cachedSharedKnowledge = "";
+    private string cachedSharedMedia = "";
+    private string cachedSharedLegitimacy = "";
+    private string cachedSharedMoney = "";
+    private string cachedSharedLabour = "";
+    private string cachedSharedSolidarity = "";
+    
+    private string cachedRoundText = "";
+    private string cachedTurnText = "";
+    private string cachedTimerText = "";
     
     private void Awake()
     {
         InitializeReferences();
         SetupButtonListeners();
     }
-    
-    private void InitializeReferences()
+
+    private void Start()
     {
-        if (topPanel == null)
-            topPanel = transform.Find("TopPanel")?.gameObject;
-        
-        if (topPanel != null)
+        playCardPanel.SetActive(false);
+        sectorUI.ShowSectorPanel(false, null);
+        countryUI.ShowCountryPanel(false, null);
+    }
+
+    public void ShowSectorUI(bool show, SectorManager sector)
+    {
+        if (sectorUI == null)
         {
-            personalResourcesPanel = topPanel.transform.Find("PersonalResources")?.gameObject;
-            sharedResourcesPanel = topPanel.transform.Find("SharedResources")?.gameObject;
-            timerPanel = topPanel.transform.Find("Timer_Panel")?.gameObject;
-            winConditionsPanel = topPanel.transform.Find("WinConditions_Panel")?.gameObject;
-            playerImage = topPanel.transform.Find("Image_Player")?.GetComponent<Image>();
-            
-            peacefulSlider = topPanel.transform.Find("Peaceful_Slider")?.GetComponent<Slider>();
-            violentSlider = topPanel.transform.Find("Violent_Slider")?.GetComponent<Slider>();
+            Debug.Log("UIManager ShowSectorUI(): sector UI is null.");
+            return;
+        }
+        Debug.Log($"UIManager ShowSectorUI(): Showing sector UI: {show}, Sector: {sector?.sectorName}");
+        sectorUI.ShowSectorPanel(show, sector);
+    }
+
+    public void ShowCountryUI(bool show, CountryManager country)
+    {
+        if (countryUI == null)
+        {
+            Debug.Log("UIManager ShowCountryUI(): country UI is null.");
+            return;
+        }
+        Debug.Log($"UIManager ShowCountryUI(): Showing country UI: {show}, Country: {country?.countryName}");
+        countryUI.ShowCountryPanel(show, country);
+    }
+
+    public void UpdateUIPerTurn()
+    {
+        currentPlayer = roundManager.currentPlayer;
+        playerImage.color = currentPlayer.playerColor;
+
+        //UpdateTimer(roundManager.secondsPerRound)
+        UpdateRound(roundManager.currentRound);
+        UpdateTurn(roundManager.currentTurn);
+        craftButton.interactable = roundManager.canCraft;
+
+        UpdatePersonalResources();
+        UpdateSharedResources();
+
+        UpdatePeacefulSlider(gameManager.peacefulPoints / gameManager.maxPeacefulPoints);
+        UpdateViolentSlider(gameManager.violentPoints / gameManager.maxViolentPoints);
+    }
+
+    public void UpdateResourcesUI()
+    {
+        UpdatePersonalResources();
+        UpdateSharedResources();
+    }
+
+    public void UpdatePersonalResources()
+    {
+        if (currentPlayer == null) return;
+        
+        // Only update and allocate strings when values change
+        string newKnowledge = currentPlayer.personalResources.knowledge.ToString();
+        if (cachedPersonalKnowledge != newKnowledge)
+        {
+            cachedPersonalKnowledge = newKnowledge;
+            if (personalKnowledgeText != null) personalKnowledgeText.text = cachedPersonalKnowledge;
         }
         
-        InitializeResourceTexts();
-        InitializeTimerTexts();
-        InitializeButtons();
-        InitializeOtherManagers();
-    }
-    
-    private void InitializeResourceTexts()
-    {
-        if (personalResourcesPanel != null)
+        string newMedia = currentPlayer.personalResources.media.ToString();
+        if (cachedPersonalMedia != newMedia)
         {
-            personalKnowledgeText = personalResourcesPanel.transform.Find("Knowledge_Text")?.GetComponent<TextMeshProUGUI>();
-            personalMediaText = personalResourcesPanel.transform.Find("Media_Text")?.GetComponent<TextMeshProUGUI>();
-            personalLegitimacyText = personalResourcesPanel.transform.Find("Legitimacy_Text")?.GetComponent<TextMeshProUGUI>();
-            personalMoneyText = personalResourcesPanel.transform.Find("Money_Text")?.GetComponent<TextMeshProUGUI>();
-            personalLabourText = personalResourcesPanel.transform.Find("Labour_Text")?.GetComponent<TextMeshProUGUI>();
-            personalSolidarityText = personalResourcesPanel.transform.Find("Solidarity_Text")?.GetComponent<TextMeshProUGUI>();
+            cachedPersonalMedia = newMedia;
+            if (personalMediaText != null) personalMediaText.text = cachedPersonalMedia;
         }
         
-        if (sharedResourcesPanel != null)
+        string newLegitimacy = currentPlayer.personalResources.legitimacy.ToString();
+        if (cachedPersonalLegitimacy != newLegitimacy)
         {
-            sharedKnowledgeText = sharedResourcesPanel.transform.Find("Knowledge_Text")?.GetComponent<TextMeshProUGUI>();
-            sharedMediaText = sharedResourcesPanel.transform.Find("Media_Text")?.GetComponent<TextMeshProUGUI>();
-            sharedLegitimacyText = sharedResourcesPanel.transform.Find("Legitimacy_Text")?.GetComponent<TextMeshProUGUI>();
-            sharedMoneyText = sharedResourcesPanel.transform.Find("Money_Text")?.GetComponent<TextMeshProUGUI>();
-            sharedLabourText = sharedResourcesPanel.transform.Find("Labour_Text")?.GetComponent<TextMeshProUGUI>();
-            sharedSolidarityText = sharedResourcesPanel.transform.Find("Solidarity_Text")?.GetComponent<TextMeshProUGUI>();
+            cachedPersonalLegitimacy = newLegitimacy;
+            if (personalLegitimacyText != null) personalLegitimacyText.text = cachedPersonalLegitimacy;
+        }
+        
+        string newMoney = currentPlayer.personalResources.money.ToString();
+        if (cachedPersonalMoney != newMoney)
+        {
+            cachedPersonalMoney = newMoney;
+            if (personalMoneyText != null) personalMoneyText.text = cachedPersonalMoney;
+        }
+        
+        string newLabour = currentPlayer.personalResources.labour.ToString();
+        if (cachedPersonalLabour != newLabour)
+        {
+            cachedPersonalLabour = newLabour;
+            if (personalLabourText != null) personalLabourText.text = cachedPersonalLabour;
+        }
+        
+        string newSolidarity = currentPlayer.personalResources.solidarity.ToString();
+        if (cachedPersonalSolidarity != newSolidarity)
+        {
+            cachedPersonalSolidarity = newSolidarity;
+            if (personalSolidarityText != null) personalSolidarityText.text = cachedPersonalSolidarity;
         }
     }
-    
-    private void InitializeTimerTexts()
+
+    public void UpdateSharedResources()
     {
-        if (timerPanel != null)
+        if (sharedResources == null) return;
+        if (currentPlayer == null) return;
+        
+        // Only update and allocate strings when values change
+        string newKnowledge = sharedResources.resources.knowledge.ToString();
+        if (cachedSharedKnowledge != newKnowledge)
         {
-            timerText = timerPanel.transform.Find("Timer_text")?.GetComponent<TextMeshProUGUI>();
-            roundText = timerPanel.transform.Find("Round_text")?.GetComponent<TextMeshProUGUI>();
-            turnText = timerPanel.transform.Find("Turn_text")?.GetComponent<TextMeshProUGUI>();
+            cachedSharedKnowledge = newKnowledge;
+            if (sharedKnowledgeText != null) sharedKnowledgeText.text = cachedSharedKnowledge;
+        }
+        
+        string newMedia = sharedResources.resources.media.ToString();
+        if (cachedSharedMedia != newMedia)
+        {
+            cachedSharedMedia = newMedia;
+            if (sharedMediaText != null) sharedMediaText.text = cachedSharedMedia;
+        }
+        
+        string newLegitimacy = sharedResources.resources.legitimacy.ToString();
+        if (cachedSharedLegitimacy != newLegitimacy)
+        {
+            cachedSharedLegitimacy = newLegitimacy;
+            if (sharedLegitimacyText != null) sharedLegitimacyText.text = cachedSharedLegitimacy;
+        }
+        
+        string newMoney = sharedResources.resources.money.ToString();
+        if (cachedSharedMoney != newMoney)
+        {
+            cachedSharedMoney = newMoney;
+            if (sharedMoneyText != null) sharedMoneyText.text = cachedSharedMoney;
+        }
+        
+        string newLabour = sharedResources.resources.labour.ToString();
+        if (cachedSharedLabour != newLabour)
+        {
+            cachedSharedLabour = newLabour;
+            if (sharedLabourText != null) sharedLabourText.text = cachedSharedLabour;
+        }
+        
+        string newSolidarity = sharedResources.resources.solidarity.ToString();
+        if (cachedSharedSolidarity != newSolidarity)
+        {
+            cachedSharedSolidarity = newSolidarity;
+            if (sharedSolidarityText != null) sharedSolidarityText.text = cachedSharedSolidarity;
         }
     }
-    
-    private void InitializeButtons()
-    {
-        craftButton = transform.Find("Craft_Button")?.GetComponent<Button>();
-        confirmButton = transform.Find("Confirm_Button")?.GetComponent<Button>();
-        
-        GameObject playPanel = transform.Find("PlayCard_Panel")?.gameObject;
-        if (playPanel != null)
-        {
-            playCardPanel = playPanel;
-            playCardYesButton = playPanel.transform.Find("Yes_Button")?.GetComponent<Button>();
-            playCardNoButton = playPanel.transform.Find("No_Button")?.GetComponent<Button>();
-        }
-    }
-    
-    private void InitializeOtherManagers()
-    {
-        multiplayerUI = GetComponent<MultiplayerUI>();
-        countryUI = GetComponent<CountryUI>();
-        sectorUI = GetComponent<SectorUI>();
-        playerHandUI = GetComponent<PlayerHandUI>();
-    }
-    
-    private void SetupButtonListeners()
-    {
-        if (craftButton != null)
-            craftButton.onClick.AddListener(OnCraftButtonClicked);
-        
-        if (confirmButton != null)
-            confirmButton.onClick.AddListener(OnConfirmButtonClicked);
-        
-        if (playCardYesButton != null)
-            playCardYesButton.onClick.AddListener(OnPlayCardYesClicked);
-        
-        if (playCardNoButton != null)
-            playCardNoButton.onClick.AddListener(OnPlayCardNoClicked);
-    }
-    
-    public void UpdatePersonalResources(int knowledge, int media, int legitimacy, int money, int labour, int solidarity)
-    {
-        if (personalKnowledgeText != null) personalKnowledgeText.text = knowledge.ToString();
-        if (personalMediaText != null) personalMediaText.text = media.ToString();
-        if (personalLegitimacyText != null) personalLegitimacyText.text = legitimacy.ToString();
-        if (personalMoneyText != null) personalMoneyText.text = money.ToString();
-        if (personalLabourText != null) personalLabourText.text = labour.ToString();
-        if (personalSolidarityText != null) personalSolidarityText.text = solidarity.ToString();
-    }
-    
-    public void UpdateSharedResources(int knowledge, int media, int legitimacy, int money, int labour, int solidarity)
-    {
-        if (sharedKnowledgeText != null) sharedKnowledgeText.text = knowledge.ToString();
-        if (sharedMediaText != null) sharedMediaText.text = media.ToString();
-        if (sharedLegitimacyText != null) sharedLegitimacyText.text = legitimacy.ToString();
-        if (sharedMoneyText != null) sharedMoneyText.text = money.ToString();
-        if (sharedLabourText != null) sharedLabourText.text = labour.ToString();
-        if (sharedSolidarityText != null) sharedSolidarityText.text = solidarity.ToString();
-    }
-    
-    public void UpdateTimer(string timerValue)
+
+    public void UpdateTimer(float currentSeconds)
     {
         if (timerText != null)
-            timerText.text = timerValue;
+        {
+            int minutes = Mathf.FloorToInt(currentSeconds / 60f);
+            int seconds = Mathf.FloorToInt(currentSeconds % 60f);
+            string newTimerText = string.Format("{0:00}:{1:00}", minutes, seconds);
+            
+            if (cachedTimerText != newTimerText)
+            {
+                cachedTimerText = newTimerText;
+                timerText.text = cachedTimerText;
+            }
+        }
     }
     
     public void UpdateRound(int round)
     {
         if (roundText != null)
-            roundText.text = $"Round {round}";
+        {
+            string newRoundText = round.ToString();
+            if (cachedRoundText != newRoundText)
+            {
+                cachedRoundText = newRoundText;
+                roundText.text = cachedRoundText;
+            }
+        }
     }
     
     public void UpdateTurn(int turn)
     {
         if (turnText != null)
-            turnText.text = $"Turn {turn}";
+        {
+            string newTurnText = turn.ToString();
+            if (cachedTurnText != newTurnText)
+            {
+                cachedTurnText = newTurnText;
+                turnText.text = cachedTurnText;
+            }
+        }
     }
     
     public void UpdatePeacefulSlider(float value)
@@ -201,37 +291,129 @@ public class UIManager : MonoBehaviour
             violentSlider.value = value;
     }
     
-    public void SetPlayerImage(Sprite sprite)
-    {
-        if (playerImage != null)
-            playerImage.sprite = sprite;
-    }
-    
-    public void ShowPlayCardPanel(bool show)
+    public void ShowPlayCardPanel(bool show, CardManager cardToPlay, CardTarget target)
     {
         if (playCardPanel != null)
             playCardPanel.SetActive(show);
+
+        cardToPlayImage.sprite = cardToPlay.cardImage;
+        playCardPromptText.text = $"Are you sure you want to play {cardToPlay.cardName} on {target.name}?";
     }
-    
+    private void OnPlayCardYesClicked()
+    {
+        Debug.Log("Play card Yes button clicked");
+        ShowPlayCardPanel(false, null, null);
+        //currentPlayer.PlayCard();
+    }
+
+    private void OnPlayCardNoClicked()
+    {
+        Debug.Log("Play card No button clicked");
+        ShowPlayCardPanel(false, null, null);
+    }
+
     private void OnCraftButtonClicked()
     {
         Debug.Log("Craft button clicked");
+        //open craft panel
     }
     
     private void OnConfirmButtonClicked()
     {
         Debug.Log("Confirm button clicked");
+        roundManager.NextTurn();
     }
-    
-    private void OnPlayCardYesClicked()
+
+    private void InitializeReferences()
     {
-        Debug.Log("Play card Yes button clicked");
-        ShowPlayCardPanel(false);
+        if (topPanel == null)
+            topPanel = transform.Find("TopPanel")?.gameObject;
+
+        if (topPanel != null)
+        {
+            personalResourcesPanel = topPanel.transform.Find("PersonalResources")?.gameObject;
+            sharedResourcesPanel = topPanel.transform.Find("SharedResources")?.gameObject;
+            timerPanel = topPanel.transform.Find("Timer_Panel")?.gameObject;
+            winConditionsPanel = topPanel.transform.Find("WinConditions_Panel")?.gameObject;
+            playerImage = topPanel.transform.Find("Image_Player")?.GetComponent<Image>();
+
+            peacefulSlider = topPanel.transform.Find("Peaceful_Slider")?.GetComponent<Slider>();
+            violentSlider = topPanel.transform.Find("Violent_Slider")?.GetComponent<Slider>();
+        }
+
+        InitializeResourceTexts();
+        InitializeTimerTexts();
+        InitializeButtons();
+        InitializeOtherManagers();
     }
-    
-    private void OnPlayCardNoClicked()
+
+    private void InitializeResourceTexts()
     {
-        Debug.Log("Play card No button clicked");
-        ShowPlayCardPanel(false);
+        if (personalResourcesPanel != null)
+        {
+            personalKnowledgeText = personalResourcesPanel.transform.Find("Knowledge_Text")?.GetComponent<TextMeshProUGUI>();
+            personalMediaText = personalResourcesPanel.transform.Find("Media_Text")?.GetComponent<TextMeshProUGUI>();
+            personalLegitimacyText = personalResourcesPanel.transform.Find("Legitimacy_Text")?.GetComponent<TextMeshProUGUI>();
+            personalMoneyText = personalResourcesPanel.transform.Find("Money_Text")?.GetComponent<TextMeshProUGUI>();
+            personalLabourText = personalResourcesPanel.transform.Find("Labour_Text")?.GetComponent<TextMeshProUGUI>();
+            personalSolidarityText = personalResourcesPanel.transform.Find("Solidarity_Text")?.GetComponent<TextMeshProUGUI>();
+        }
+
+        if (sharedResourcesPanel != null)
+        {
+            sharedKnowledgeText = sharedResourcesPanel.transform.Find("Knowledge_Text")?.GetComponent<TextMeshProUGUI>();
+            sharedMediaText = sharedResourcesPanel.transform.Find("Media_Text")?.GetComponent<TextMeshProUGUI>();
+            sharedLegitimacyText = sharedResourcesPanel.transform.Find("Legitimacy_Text")?.GetComponent<TextMeshProUGUI>();
+            sharedMoneyText = sharedResourcesPanel.transform.Find("Money_Text")?.GetComponent<TextMeshProUGUI>();
+            sharedLabourText = sharedResourcesPanel.transform.Find("Labour_Text")?.GetComponent<TextMeshProUGUI>();
+            sharedSolidarityText = sharedResourcesPanel.transform.Find("Solidarity_Text")?.GetComponent<TextMeshProUGUI>();
+        }
+    }
+
+    private void InitializeTimerTexts()
+    {
+        if (timerPanel != null)
+        {
+            timerText = timerPanel.transform.Find("Timer_text")?.GetComponent<TextMeshProUGUI>();
+            roundText = timerPanel.transform.Find("Round_text")?.GetComponent<TextMeshProUGUI>();
+            turnText = timerPanel.transform.Find("Turn_text")?.GetComponent<TextMeshProUGUI>();
+        }
+    }
+
+    private void InitializeButtons()
+    {
+        if(craftButton == null) craftButton = transform.Find("Craft_Button")?.GetComponent<Button>();
+        if (confirmButton == null) confirmButton = transform.Find("Confirm_Button")?.GetComponent<Button>();
+
+        GameObject playPanel = transform.Find("PlayCard_Panel")?.gameObject;
+        if (playPanel != null)
+        {
+            playCardPanel = playPanel;
+            playCardYesButton = playPanel.transform.Find("Yes_Button")?.GetComponent<Button>();
+            playCardNoButton = playPanel.transform.Find("No_Button")?.GetComponent<Button>();
+        }
+    }
+
+    private void InitializeOtherManagers()
+    {
+        if (multiplayerUI == null) multiplayerUI = GetComponentInChildren<MultiplayerUI>();
+        if (countryUI == null) countryUI = GetComponentInChildren<CountryUI>();
+        if (sectorUI == null) sectorUI = GetComponentInChildren<SectorUI>();
+        if (playerHandUI == null) playerHandUI = GetComponentInChildren<PlayerHandUI>();
+    }
+
+    private void SetupButtonListeners()
+    {
+        if (craftButton != null)
+            craftButton.onClick.AddListener(OnCraftButtonClicked);
+
+        if (confirmButton != null)
+            confirmButton.onClick.AddListener(OnConfirmButtonClicked);
+
+        if (playCardYesButton != null)
+            playCardYesButton.onClick.AddListener(OnPlayCardYesClicked);
+
+        if (playCardNoButton != null)
+            playCardNoButton.onClick.AddListener(OnPlayCardNoClicked);
     }
 }

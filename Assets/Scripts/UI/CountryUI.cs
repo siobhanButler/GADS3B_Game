@@ -2,8 +2,12 @@ using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 
+//To add: if you click on one of the sectors, it will show the sector UI for that sector
+
 public class CountryUI : MonoBehaviour
 {
+    CountryManager selectedCountry;
+
     [Header("Country Panel Components")]
     [SerializeField] private GameObject countryPanel;
     [SerializeField] private TextMeshProUGUI countryNameText;
@@ -11,10 +15,10 @@ public class CountryUI : MonoBehaviour
     [SerializeField] private TextMeshProUGUI descriptionText;
     [SerializeField] private Slider countryInfluenceSlider;
     [SerializeField] private Image countryCardImage;
+    [SerializeField] private Button closeCountryUIButton;
     
     [Header("Country Sectors Panel")]
     [SerializeField] private GameObject countrySectorsPanel;
-    [SerializeField] private TextMeshProUGUI sectorsText;
     
     [Header("Sector Sliders")]
     [SerializeField] private GameObject governmentSector;
@@ -31,91 +35,158 @@ public class CountryUI : MonoBehaviour
     private void Awake()
     {
         InitializeReferences();
+        SetupButtonListeners();
     }
     
-    private void InitializeReferences()
-    {
-        countryPanel = transform.Find("Country_Panel")?.gameObject;
-        
-        if (countryPanel != null)
-        {
-            countryNameText = countryPanel.transform.Find("CountryName_Text")?.GetComponent<TextMeshProUGUI>();
-            archetypeText = countryPanel.transform.Find("Archetype_Text")?.GetComponent<TextMeshProUGUI>();
-            countryInfluenceSlider = countryPanel.transform.Find("CountryInfluence_Slider")?.GetComponent<Slider>();
-            countryCardImage = countryPanel.transform.Find("Card1_Img")?.GetComponent<Image>();
-            
-            Transform descriptionTransform = countryPanel.transform.Find("Description");
-            if (descriptionTransform != null)
-            {
-                descriptionText = descriptionTransform.Find("Description_Text")?.GetComponent<TextMeshProUGUI>();
-            }
-            
-            countrySectorsPanel = countryPanel.transform.Find("CountrySectors_Panel")?.gameObject;
-            
-            if (countrySectorsPanel != null)
-            {
-                InitializeSectorReferences();
-            }
-        }
-    }
-    
-    private void InitializeSectorReferences()
-    {
-        sectorsText = countrySectorsPanel.transform.Find("Sectors")?.GetComponent<TextMeshProUGUI>();
-        
-        governmentSector = countrySectorsPanel.transform.Find("GovernmentSector")?.gameObject;
-        if (governmentSector != null)
-        {
-            governmentSectorSlider = governmentSector.transform.Find("GovernmentSectorSlider")?.GetComponent<Slider>();
-        }
-        
-        economicSector = countrySectorsPanel.transform.Find("EconomicSector")?.gameObject;
-        if (economicSector != null)
-        {
-            economicSectorSlider = economicSector.transform.Find("EconomicSectorSlider")?.GetComponent<Slider>();
-        }
-        
-        mediaSector = countrySectorsPanel.transform.Find("MediaSector")?.gameObject;
-        if (mediaSector != null)
-        {
-            mediaSectorSlider = mediaSector.transform.Find("MediaSectorSlider")?.GetComponent<Slider>();
-        }
-        
-        socialSector = countrySectorsPanel.transform.Find("SocialSector")?.gameObject;
-        if (socialSector != null)
-        {
-            socialSectorSlider = socialSector.transform.Find("SocialSectorSlider")?.GetComponent<Slider>();
-        }
-        
-        activismSector = countrySectorsPanel.transform.Find("ActivismSector")?.gameObject;
-        if (activismSector != null)
-        {
-            activismSectorSlider = activismSector.transform.Find("ActivismSectorSlider")?.GetComponent<Slider>();
-        }
-    }
-    
-    public void ShowCountryPanel(bool show)
+    public void ShowCountryPanel(bool show, CountryManager country)
     {
         if (countryPanel != null)
             countryPanel.SetActive(show);
+        else 
+            Debug.Log("CountryUI ShowCountryPanel(): no country panel");
+
+        selectedCountry = country;
+        UpdateCountryUI();
     }
-    
+
+    public void UpdateCountryUI()
+    {
+        if (selectedCountry == null)
+        {
+            Debug.Log("CountryUI UpdateCountryUI: no selected country.");
+            return;
+        }
+        UpdateCountryInfo();
+        UpdateCountryCard();
+        UpdateSectorInfluences();
+    }
+
+    public void UpdateCountryInfo()
+    {
+        if (selectedCountry == null) return;
+        if (countryNameText != null) try { countryNameText.text = selectedCountry.countryName; } 
+                                        catch { countryNameText.text = ""; }
+        if (archetypeText != null)  try { archetypeText.text = selectedCountry.archetype.name; } 
+                                        catch { archetypeText.text = ""; }
+        if (descriptionText != null) try { descriptionText.text = selectedCountry.description; } 
+                                        catch { descriptionText.text = ""; }
+        if (countryInfluenceSlider != null) countryInfluenceSlider.value = selectedCountry.totalInfluence;
+    }
+
+    public void UpdateCountryCard()
+    {
+        if (selectedCountry == null) return;
+        if (countryCardImage != null && selectedCountry.cardSlot != null)
+            countryCardImage.sprite = selectedCountry.cardSlot.cardImage;
+    }
+
+    public void UpdateSectorInfluences()
+    {
+        if (selectedCountry == null) return;
+
+        if (governmentSectorSlider != null && selectedCountry.governmentSector != null)
+            governmentSectorSlider.value = selectedCountry.governmentSector.currentInfluence;
+
+        if (economicSectorSlider != null && selectedCountry.economicSector != null)
+            economicSectorSlider.value = selectedCountry.economicSector.currentInfluence;
+
+        if (mediaSectorSlider != null && selectedCountry.mediaSector != null)
+            mediaSectorSlider.value = selectedCountry.mediaSector.currentInfluence;
+
+        if (socialSectorSlider != null && selectedCountry.socialSector != null)
+            socialSectorSlider.value = selectedCountry.socialSector.currentInfluence;
+
+        if (activismSectorSlider != null && selectedCountry.activismSector != null)
+            activismSectorSlider.value = selectedCountry.activismSector.currentInfluence;
+    }
+
+    private void InitializeReferences()
+    {
+        if (countryPanel == null)
+            countryPanel = transform.Find("Country_Panel")?.gameObject;
+
+        if (countryPanel != null)
+        {
+            if (countryNameText == null) countryNameText = countryPanel.transform.Find("CountryName_Text")?.GetComponent<TextMeshProUGUI>();
+            if (archetypeText == null) archetypeText = countryPanel.transform.Find("Archetype_Text")?.GetComponent<TextMeshProUGUI>();
+            if (countryInfluenceSlider == null) countryInfluenceSlider = countryPanel.transform.Find("CountryInfluence_Slider")?.GetComponent<Slider>();
+            if (countryCardImage == null) countryCardImage = countryPanel.transform.Find("Card1_Img")?.GetComponent<Image>();
+            if (closeCountryUIButton == null) closeCountryUIButton = countryPanel.transform.Find("CloseCountryUI_Button")?.GetComponent<Button>();
+
+            Transform descriptionTransform = countryPanel.transform.Find("Description");
+            if (descriptionTransform != null)
+            {
+                if (descriptionText == null) descriptionText = descriptionTransform.Find("Description_Text")?.GetComponent<TextMeshProUGUI>();
+            }
+
+            if (countrySectorsPanel == null) countrySectorsPanel = countryPanel.transform.Find("CountrySectors_Panel")?.gameObject;
+
+            if (countrySectorsPanel != null)
+            {
+                //InitializeSectorReferences();
+                if (governmentSector == null) governmentSector = countrySectorsPanel.transform.Find("GovernmentSector")?.gameObject;
+                if (governmentSector != null)
+                {
+                    if (governmentSectorSlider == null) governmentSectorSlider = governmentSector.transform.Find("GovernmentSectorSlider")?.GetComponent<Slider>();
+                }
+
+                if (economicSector == null) economicSector = countrySectorsPanel.transform.Find("EconomicSector")?.gameObject;
+                if (economicSector != null)
+                {
+                    if (economicSectorSlider == null) economicSectorSlider = economicSector.transform.Find("EconomicSectorSlider")?.GetComponent<Slider>();
+                }
+
+                if (mediaSector == null) mediaSector = countrySectorsPanel.transform.Find("MediaSector")?.gameObject;
+                if (mediaSector != null)
+                {
+                    if (mediaSectorSlider == null) mediaSectorSlider = mediaSector.transform.Find("MediaSectorSlider")?.GetComponent<Slider>();
+                }
+
+                if (socialSector == null) socialSector = countrySectorsPanel.transform.Find("SocialSector")?.gameObject;
+                if (socialSector != null)
+                {
+                    if (socialSectorSlider == null) socialSectorSlider = socialSector.transform.Find("SocialSectorSlider")?.GetComponent<Slider>();
+                }
+
+                if (activismSector == null) activismSector = countrySectorsPanel.transform.Find("ActivismSector")?.gameObject;
+                if (activismSector != null)
+                {
+                    if (activismSectorSlider == null) activismSectorSlider = activismSector.transform.Find("ActivismSectorSlider")?.GetComponent<Slider>();
+                }
+            }
+        }
+    }
+
+    private void SetupButtonListeners()
+    {
+        if (closeCountryUIButton != null)
+            closeCountryUIButton.onClick.AddListener(OnCloseCountryUIClicked);
+    }
+
+    private void OnCloseCountryUIClicked()
+    {
+        Debug.Log("Close Country UI button clicked");
+        ShowCountryPanel(false, null);
+    }
+}
+
+/*
     public void SetCountryName(string countryName)
     {
         if (countryNameText != null)
-            countryNameText.text = countryName;
+            try { countryNameText.text = countryName; } catch { countryNameText.text = ""; }
     }
     
     public void SetArchetype(string archetype)
     {
         if (archetypeText != null)
-            archetypeText.text = archetype;
+            try { archetypeText.text = archetype; } catch { archetypeText.text = ""; }
     }
     
     public void SetDescription(string description)
     {
         if (descriptionText != null)
-            descriptionText.text = description;
+            try { descriptionText.text = description; } catch { descriptionText.text = ""; }
     }
     
     public void SetCountryInfluence(float influence)
@@ -226,4 +297,5 @@ public class CountryUI : MonoBehaviour
     {
         return countryInfluenceSlider != null ? countryInfluenceSlider.value : 0f;
     }
-}
+ 
+ */
