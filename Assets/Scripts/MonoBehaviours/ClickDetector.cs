@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 /// <summary>
 /// MonoBehaviour component that detects mouse clicks on GameObjects and calls OnClick() on IClickable components
@@ -42,6 +43,12 @@ public class ClickDetector : MonoBehaviour
     {
         if (cam == null) return;
         
+        // If the pointer is over a UI element, block world click handling
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+        
         // Create ray from camera through mouse position using new Input System
         Ray ray = cam.ScreenPointToRay(Mouse.current.position.ReadValue());
         RaycastHit hit;
@@ -51,28 +58,12 @@ public class ClickDetector : MonoBehaviour
         {
             GameObject clickedObject = hit.collider.gameObject;
             
-            // Get all IClickable components on the clicked object
+            // Only invoke click handlers on the foremost hit object.
+            // Do not propagate to parents or objects behind the first hit.
             IClickable[] clickableComponents = clickedObject.GetComponents<IClickable>();
-            
-            // Call OnClick() on all IClickable components on the clicked object first
-            foreach (IClickable clickable in clickableComponents)
+            for (int i = 0; i < clickableComponents.Length; i++)
             {
-                clickable.OnClick(this);
-            }
-            
-            // If no IClickable found on the clicked object, check parent objects
-            if (clickableComponents.Length == 0)
-            {
-                Transform parent = clickedObject.transform.parent;
-                while (parent != null)
-                {
-                    IClickable[] parentClickables = parent.GetComponents<IClickable>();
-                    foreach (IClickable clickable in parentClickables)
-                    {
-                        clickable.OnClick(this);
-                    }
-                    parent = parent.parent;
-                }
+                clickableComponents[i].OnClick(this);
             }
         }
     }
