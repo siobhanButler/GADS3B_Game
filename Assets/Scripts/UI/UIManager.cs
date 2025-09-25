@@ -221,49 +221,104 @@ public class UIManager : MonoBehaviour
 
     public void UpdatePersonalResources()
     {
-        if (currentPlayer == null) return;
+        if (currentPlayer == null) 
+        {
+            Debug.LogWarning("UIManager.UpdatePersonalResources(): currentPlayer is null");
+            return;
+        }
+        
+        Debug.Log($"UIManager.UpdatePersonalResources(): Updating for player {currentPlayer.playerName}");
+        Debug.Log($"UIManager.UpdatePersonalResources(): Personal resources - K:{currentPlayer.personalResources.knowledge}, M:{currentPlayer.personalResources.money}, Me:{currentPlayer.personalResources.media}, L:{currentPlayer.personalResources.labour}, S:{currentPlayer.personalResources.solidarity}, Le:{currentPlayer.personalResources.legitimacy}");
         
         // Only update and allocate strings when values change
         string newKnowledge = currentPlayer.personalResources.knowledge.ToString();
         if (cachedPersonalKnowledge != newKnowledge)
         {
             cachedPersonalKnowledge = newKnowledge;
-            if (personalKnowledgeText != null) personalKnowledgeText.text = cachedPersonalKnowledge;
+            if (personalKnowledgeText != null) 
+            {
+                personalKnowledgeText.text = cachedPersonalKnowledge;
+                Debug.Log($"UIManager.UpdatePersonalResources(): Updated Knowledge text to {cachedPersonalKnowledge}");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager.UpdatePersonalResources(): personalKnowledgeText is null");
+            }
         }
         
         string newMedia = currentPlayer.personalResources.media.ToString();
         if (cachedPersonalMedia != newMedia)
         {
             cachedPersonalMedia = newMedia;
-            if (personalMediaText != null) personalMediaText.text = cachedPersonalMedia;
+            if (personalMediaText != null) 
+            {
+                personalMediaText.text = cachedPersonalMedia;
+                Debug.Log($"UIManager.UpdatePersonalResources(): Updated Media text to {cachedPersonalMedia}");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager.UpdatePersonalResources(): personalMediaText is null");
+            }
         }
         
         string newLegitimacy = currentPlayer.personalResources.legitimacy.ToString();
         if (cachedPersonalLegitimacy != newLegitimacy)
         {
             cachedPersonalLegitimacy = newLegitimacy;
-            if (personalLegitimacyText != null) personalLegitimacyText.text = cachedPersonalLegitimacy;
+            if (personalLegitimacyText != null) 
+            {
+                personalLegitimacyText.text = cachedPersonalLegitimacy;
+                Debug.Log($"UIManager.UpdatePersonalResources(): Updated Legitimacy text to {cachedPersonalLegitimacy}");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager.UpdatePersonalResources(): personalLegitimacyText is null");
+            }
         }
         
         string newMoney = currentPlayer.personalResources.money.ToString();
         if (cachedPersonalMoney != newMoney)
         {
             cachedPersonalMoney = newMoney;
-            if (personalMoneyText != null) personalMoneyText.text = cachedPersonalMoney;
+            if (personalMoneyText != null) 
+            {
+                personalMoneyText.text = cachedPersonalMoney;
+                Debug.Log($"UIManager.UpdatePersonalResources(): Updated Money text to {cachedPersonalMoney}");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager.UpdatePersonalResources(): personalMoneyText is null");
+            }
         }
         
         string newLabour = currentPlayer.personalResources.labour.ToString();
         if (cachedPersonalLabour != newLabour)
         {
             cachedPersonalLabour = newLabour;
-            if (personalLabourText != null) personalLabourText.text = cachedPersonalLabour;
+            if (personalLabourText != null) 
+            {
+                personalLabourText.text = cachedPersonalLabour;
+                Debug.Log($"UIManager.UpdatePersonalResources(): Updated Labour text to {cachedPersonalLabour}");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager.UpdatePersonalResources(): personalLabourText is null");
+            }
         }
         
         string newSolidarity = currentPlayer.personalResources.solidarity.ToString();
         if (cachedPersonalSolidarity != newSolidarity)
         {
             cachedPersonalSolidarity = newSolidarity;
-            if (personalSolidarityText != null) personalSolidarityText.text = cachedPersonalSolidarity;
+            if (personalSolidarityText != null) 
+            {
+                personalSolidarityText.text = cachedPersonalSolidarity;
+                Debug.Log($"UIManager.UpdatePersonalResources(): Updated Solidarity text to {cachedPersonalSolidarity}");
+            }
+            else
+            {
+                Debug.LogWarning("UIManager.UpdatePersonalResources(): personalSolidarityText is null");
+            }
         }
     }
 

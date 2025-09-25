@@ -10,15 +10,16 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 91b262d6858324d45b27c694faff0439, type: 3}
-  m_Name: TestArchetype
+  m_Name: Capitalist
   m_EditorClassIdentifier: 
-  archetypeName: Test Archetype
-  description: This is a test that does something
-  colour: {r: 0.9169811, g: 0, b: 0, a: 0}
+  archetypeName: Capitalist
+  description: A free-market-driven nation with urban trade hubs where peaceful strategies
+    like boycotts thrive, but violent tactics risk losing legitimacy.
+  colour: {r: 1, g: 0.71735436, b: 0, a: 0}
   sectorWeights:
-    government: 5
-    media: 5
+    government: 3
+    media: 2
     economic: 5
-    social: 5
-    activism: 5
+    social: 1
+    activism: 1
   notes: 

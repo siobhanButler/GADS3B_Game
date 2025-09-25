@@ -170,7 +170,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -41.3227, y: 0}
+  m_AnchoredPosition: {x: -41.3227, y: -7.64917}
   m_SizeDelta: {x: 351.7546, y: 22.4797}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &5619842635228295474
@@ -228,8 +228,8 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 20
-  m_fontSizeBase: 20
+  m_fontSize: 10
+  m_fontSizeBase: 10
   m_fontWeight: 400
   m_enableAutoSizing: 0
   m_fontSizeMin: 18
@@ -306,7 +306,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -41.3227, y: 18.6492}
+  m_AnchoredPosition: {x: -41.3227, y: 11}
   m_SizeDelta: {x: 351.7546, y: 22.4797}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &389464826668518999
@@ -504,6 +504,7 @@ MonoBehaviour:
   craftButton: {fileID: 1809089455165906483}
   cardNameText: {fileID: 8483408774144274192}
   cardDescriptionText: {fileID: 5655134776100419897}
+  uiManager: {fileID: 0}
 --- !u!1 &8716875039476306181
 GameObject:
   m_ObjectHideFlags: 0

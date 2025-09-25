@@ -115,6 +115,7 @@ public class RoundManager : MonoBehaviour
     public void NextTurn()
     {
         gameManager.CheckWinLoseConditions();
+
         currentTurn++;
 
         if (currentTurn > turnsPerRound)        // round is over
