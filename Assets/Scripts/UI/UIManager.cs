@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using TreeEditor;
 using Unity.Burst.Intrinsics;
@@ -54,8 +55,8 @@ public class UIManager : MonoBehaviour
     
     [Header("Other UI Managers")]
     [SerializeField] public MultiplayerUI multiplayerUI;
-    [SerializeField] private CountryUI countryUI;
-    [SerializeField] private SectorUI sectorUI;
+    [SerializeField] public CountryUI countryUI;
+    [SerializeField] public SectorUI sectorUI;
     [SerializeField] public PlayerHandUI playerHandUI;
     
     [Header("Crafting UI")]
@@ -103,6 +104,20 @@ public class UIManager : MonoBehaviour
         sectorUI.ShowSectorPanel(false, null);
         countryUI.ShowCountryPanel(false, null);
         ShowCraftingUI(false);
+    }
+
+    private void OnEnable()
+    {
+        RoundManager.OnNextPlayer += HandleNextPlayer;
+    }
+
+    private void HandleNextPlayer()
+    {
+        //Hide all UI
+        ShowCountryUI(false, null);
+        ShowSectorUI(false, null);
+        ShowCraftingUI(false);
+        ShowPlayCardUI(false, null, null);
     }
 
     public void ShowSectorUI(bool show, SectorManager sector)
@@ -193,6 +208,9 @@ public class UIManager : MonoBehaviour
         UpdateViolentSlider(gameManager.violentPoints / gameManager.maxViolentPoints);
 
         multiplayerUI.UpdatePlayers(roundManager.currentPlayerIndex);
+        
+        // Update crafting buttons for the new player
+        UpdateCraftingButtons();
     }
 
     public void UpdateResourcesUI()
@@ -388,6 +406,21 @@ public class UIManager : MonoBehaviour
     {
         if (confirmButton != null)
             confirmButton.interactable = enable;
+    }
+
+    private void UpdateCraftingButtons()
+    {
+        if (craftingUIPanel != null)
+        {
+            CraftingManager[] craftingManagers = craftingUIPanel.GetComponentsInChildren<CraftingManager>();
+            foreach (CraftingManager craftingManager in craftingManagers)
+            {
+                if (craftingManager != null)
+                {
+                    craftingManager.SetPlayer(currentPlayer);
+                }
+            }
+        }
     }
 
 

@@ -28,6 +28,13 @@ public class PlayerManager : MonoBehaviour
     public GameManager gameManager;
     public UIManager uiManager;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip playCardAudio;
+    public AudioClip selectCardAudio;
+    public AudioClip deselectCardAudio;
+    public AudioClip craftCardAudio;
+
     public void Initialize(GameManager pGameManager, UIManager pUiManager, string pPlayerName, int pPlayerIndex, Color pPlayerColor, ApproachType pPreferredApproach, Resource pStartingResources, ResourceManager pSharedResources)
     {
         gameManager = pGameManager;
@@ -66,7 +73,8 @@ public class PlayerManager : MonoBehaviour
     public void SelectCard(CardManager card)
     {
         handManager.SelectCard(card);
-
+        if (card == null) audioSource.PlayOneShot(deselectCardAudio);
+        else audioSource.PlayOneShot(selectCardAudio);
         //logic to grey out all Game objects that it can not be played on
     }
 
@@ -97,7 +105,24 @@ public class PlayerManager : MonoBehaviour
         action.SetPlayerAction(ActionType.Craft, this, card);
         previousActions.Add(action);
 
-        card.ApplyCardEffect(target, this);
+        switch (card.approach)
+        {
+            case ApproachType.Peaceful:
+                gameManager.peacefulPoints += 10;
+                if (preferredApproach == ApproachType.Violent) gameManager.peacefulPoints -= 8; //acting against preffered type means you put effort in
+                break;
+            case ApproachType.Violent:
+                gameManager.violentPoints += 10;
+                if (preferredApproach == ApproachType.Peaceful) gameManager.violentPoints -= 8;
+                break;
+        }
+
+        handManager.PlayCard(card, target, this);
+        audioSource.PlayOneShot(playCardAudio);
+        tookActionThisTurn=true;
+        uiManager.playerHandUI.UpdateHandUI(this);
+        uiManager.sectorUI.UpdateSectorUI();
+        
     }
 
     public void AddCraftedCard(CardManager card)
@@ -118,15 +143,17 @@ public class PlayerManager : MonoBehaviour
         Debug.Log($"PlayerManager.AddCraftedCard(): Card '{card.cardName}' successfully added. Hand now has {handManager.hand.Count} cards");
 
         uiManager.playerHandUI.UpdateHandUI(this);
+        audioSource.PlayOneShot(craftCardAudio);
 
         cardsCraftedThisTurn++;
         tookActionThisTurn = true;  //crafting card counts as an action, so player can not play a card this turn, but can craft up to 3 cards
     }
 
-    public void OnNewTurn()
+    public void OnEndTurn()
     {
         cardsCraftedThisTurn = 0;
         tookActionThisTurn = false;
+        uiManager.playerHandUI.UpdateHandUI(this);
     }
 
     public void EnableInput(bool enable)

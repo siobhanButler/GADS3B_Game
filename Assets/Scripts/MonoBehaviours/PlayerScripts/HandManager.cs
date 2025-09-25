@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using static UnityEngine.GraphicsBuffer;
 
 public class HandManager : MonoBehaviour
 {
@@ -35,9 +36,10 @@ public class HandManager : MonoBehaviour
         return hand.IndexOf(card);
     }
 
-    public void PlayCard()
+    public void PlayCard(CardManager card, ICardTarget target, PlayerManager player)
     {
-
+        card.ApplyCardEffect(target, player);
+        hand.Remove(card);
     }
 
     public void AddCard(CardManager card)

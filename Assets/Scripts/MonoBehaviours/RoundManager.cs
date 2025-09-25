@@ -19,10 +19,10 @@ public class RoundManager : MonoBehaviour
     public int currentPlayerIndex;
 
     [Header("Round Settings")]
-    [SerializeField] private int totalRounds;
-    [SerializeField] private int turnsPerRound;       //number of turns in each round, last turn is discussion phase
-    [SerializeField] private int craftingTurns;       //number of turns in each round where players can craft cards
-    [SerializeField] public float secondsPerTurn;
+    [SerializeField] private int totalRounds = 10;
+    [SerializeField] private int turnsPerRound = 10;       //number of turns in each round, last turn is discussion phase
+    [SerializeField] private int craftingTurns = 3;       //number of turns in each round where players can craft cards
+    [SerializeField] public float secondsPerTurn = 60;
 
     [Header("Current Round State")]
     public float currentSeconds;    //how many seconds are left
@@ -94,6 +94,17 @@ public class RoundManager : MonoBehaviour
             return;
         }
 
+        // Establish initial state for the first turn
+        if (currentTurn == turnsPerRound)
+        {
+            SetState(RoundState.Discussion);
+        }
+        else
+        {
+            if (currentTurn <= craftingTurns) SetState(RoundState.Crafting);
+            else SetState(RoundState.Action);
+        }
+
         // Announce initial round and turn
         OnNewRound?.Invoke(currentRound);
         OnNewTurn?.Invoke(currentRound, currentTurn);
@@ -103,18 +114,22 @@ public class RoundManager : MonoBehaviour
 
     public void NextTurn()
     {
+        gameManager.CheckWinLoseConditions();
         currentTurn++;
 
-        if (currentTurn < turnsPerRound - 1)     //not the last turn, so normal crafting/action phase
-        {
-            if(currentTurn <= craftingTurns) currentState = RoundState.Crafting;    //crafting phase
-            else currentState = RoundState.Action;                                //action phase
-        }
-        else if (currentTurn == turnsPerRound) currentState = RoundState.Discussion; //last turn, meaning it is the discussion phase
-        else        //currentTurn > turnsPerRound, meaning the round is over
+        if (currentTurn > turnsPerRound)        // round is over
         {
             NextRound();
             return;
+        }
+        else if (currentTurn == turnsPerRound)
+        {
+            SetState(RoundState.Discussion);
+        }
+        else
+        {
+            if(currentTurn <= craftingTurns) SetState(RoundState.Crafting);
+            else SetState(RoundState.Action);
         }
 
         if (uiManager != null) uiManager.EnableCraftButton(canCraft);
@@ -168,6 +183,7 @@ public class RoundManager : MonoBehaviour
             uiManager.multiplayerUI.UpdatePlayers(currentPlayerIndex);
             uiManager.UpdateUIPerTurn();
             uiManager.EnableConfirmButton(true);
+            uiManager.playerHandUI.UpdateHandUI(currentPlayer);
         }
 
         OnNextPlayer?.Invoke();
@@ -199,10 +215,11 @@ public class RoundManager : MonoBehaviour
         }
     }
 
-    private void EndPlayerTurn()
+    public void EndPlayerTurn()
     {
         //disable all player actions other than clicking the Confirm button
         //currentPlayer.GetComponent<PlayerInput>().actions.FindActionMap("Player").Disable();
+        currentPlayer.OnEndTurn();
         if (uiManager != null)
         {
             uiManager.EnableCraftButton(false);

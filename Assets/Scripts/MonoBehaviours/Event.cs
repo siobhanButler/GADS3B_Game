@@ -19,10 +19,13 @@ public class Event
     [Header("For Mega, Macro & Micro Events")]
     public List<SectorManager> targetSectors;       //will be length = 1 for micro events
 
-    public Event(EventData pEventData, List<SectorManager> pTargetSectors)
+    GameManager gameManager;
+
+    public Event(EventData pEventData, List<SectorManager> pTargetSectors, GameManager pGameManager)
     {
         eventData = pEventData;
         targetSectors = pTargetSectors;
+        gameManager = pGameManager;
 
         Setup();
     }
@@ -59,7 +62,7 @@ public class Event
     {
         foreach (SectorManager sector in targetSectors)
         {
-            sector.currentInfluence += sector.currentInfluence * influenceModifier;   //if influenceModifier is a negative value, it will decrease it instead
+            sector.AddInfluence(sector.currentInfluence * influenceModifier);   //if influenceModifier is a negative value, it will decrease it instead
         }
     }
 

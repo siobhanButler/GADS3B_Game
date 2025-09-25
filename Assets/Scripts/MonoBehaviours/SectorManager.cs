@@ -200,6 +200,26 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
         if(currentInfluence >= influenceThreshold) OnSectorInfluenced();
     }
 
+    public void AddInfluence(float influence)
+    {
+        if (currentInfluence >= 100f) return;
+
+        if (currentInfluence + influence > 100f)
+        {
+            //find out how much of the influence will be added
+            float remainingInfluence = 100f - currentInfluence;
+            influence = remainingInfluence;
+        }
+
+        //add the influence to the sector
+        currentInfluence += influence;
+        currentInfluence = Mathf.Clamp(currentInfluence, 0f, 100f);
+        country.UpdateCountryInfluence();
+
+        //If Influence goes above Influence threshold
+        if (currentInfluence >= influenceThreshold) OnSectorInfluenced();
+    }
+
     public void OnSectorInfluenced()    //when the total influence threshold is reached
     {
         if (isInfluenced) return; // Prevent multiple triggers  

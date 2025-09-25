@@ -78,7 +78,7 @@ public class EventManager : MonoBehaviour
                 break;
         }
 
-        Event newEvent = new Event(newEventData, targetSectors);
+        Event newEvent = new Event(newEventData, targetSectors, gameManager);
         currentEvents.Add(newEvent);
         EnableEventUI(true, newEvent);
         return newEvent;
@@ -124,9 +124,9 @@ public class EventManager : MonoBehaviour
     {
         eventAddedThisTurn = null;
 
-        if (turnNumber == 3 || turnNumber == 9)
+        if (turnNumber == 5 || turnNumber == 10)
             eventAddedThisTurn = GenerateEvent(EEventType.Macro);    //Macro events generated twice per round
-        if (turnNumber == 2 || turnNumber == 4 || turnNumber == 6 || turnNumber == 8)
+        if (turnNumber == 3 || turnNumber == 6 || turnNumber == 9)
             eventAddedThisTurn = GenerateEvent(EEventType.Micro);  //Micro Events 4 times per round 
 
         List<Event> eventsToBeRemoved = new List<Event>();

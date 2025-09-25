@@ -14,12 +14,15 @@ public class CraftingManager : MonoBehaviour
     public TextMeshProUGUI cardNameText;
     public TextMeshProUGUI cardDescriptionText;
 
+    public UIManager uiManager;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         craftButton.onClick.AddListener(CraftCard);
         cardNameText.text = actionCardData.name;
         cardDescriptionText.text = actionCardData.description;
+        if(uiManager == null) uiManager = GetComponentInParent<UIManager>();
     }
 
     // Update is called once per frame
@@ -30,16 +33,30 @@ public class CraftingManager : MonoBehaviour
 
     private void OnEnable()
     {
-        player = FindFirstObjectByType<PlayerManager>();
-        //player = GetComponent<PlayerManager>(); //fix this to get correct player
-        craftButton.interactable = CanCraftCard();
+        // Get the current player from UIManager
+        if (uiManager != null)
+        {
+            player = uiManager.currentPlayer;
+        }
+        else
+        {
+            uiManager = GetComponentInParent<UIManager>();
+            if (uiManager != null)
+            {
+                player = uiManager.currentPlayer;
+            }
+        }
+        
+        UpdateCraftButtonState();
     }
 
     public void CraftCard() //attached to the button called Craft
     {
+        player = uiManager.currentPlayer;
         if (!CanCraftCard())
         {
             Debug.LogWarning($"CraftingManager: Cannot craft {actionCardData.cardName} - insufficient resources");
+            if (uiManager != null) uiManager.ShowCraftingUI(false);
             return;
         }
 
@@ -204,5 +221,20 @@ public class CraftingManager : MonoBehaviour
         {
             actionCardData.cost = actionCardData.cost * 2;  //double the cost
         }
+    }
+
+    public void UpdateCraftButtonState()
+    {
+        if (craftButton != null)
+        {
+            craftButton.interactable = CanCraftCard();
+            Debug.Log($"CraftingManager.UpdateCraftButtonState(): Button for '{actionCardData?.cardName}' is {(craftButton.interactable ? "interactable" : "not interactable")}");
+        }
+    }
+
+    public void SetPlayer(PlayerManager newPlayer)
+    {
+        player = newPlayer;
+        UpdateCraftButtonState();
     }
 }

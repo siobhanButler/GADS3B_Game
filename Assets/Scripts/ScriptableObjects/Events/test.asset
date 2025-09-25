@@ -10,22 +10,21 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ffa3dd91c2bada94f80880c277e3c62b, type: 3}
-  m_Name: MI_Echo Chamber Formation
+  m_Name: test
   m_EditorClassIdentifier: 
-  eventName: Echo Chamber Formation
+  eventName: Test
   eventDescription: A subgroup forms an echo chamber, reinforcing extreme views within
     the movement.
-  eventEffect: ' Reduces solidarity as internal cohesion weakens and legitimacy as
-    the public lays witness to this.'
+  eventEffect: Add 50%  influence
   eventLifetime: 0
   eventType: 2
   sectorType: 4
-  effectType: 1
-  influenceModifier: 1
+  effectType: 0
+  influenceModifier: 0.5
   resourceModifier:
     knowledge: 0
     money: 0
     media: 0
     labour: 0
-    solidarity: -20
-    legitimacy: -10
+    solidarity: 0
+    legitimacy: 0

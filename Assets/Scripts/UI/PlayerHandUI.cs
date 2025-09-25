@@ -84,17 +84,33 @@ public class PlayerHandUI : MonoBehaviour
     
     public void ShowPlayCardPanel(bool show, CardManager card, ICardTarget target)
     {
+        // Only block showing when an action was already taken; always allow hiding
+        if (show && currentPlayer != null && currentPlayer.tookActionThisTurn) return;
+
         if (playCardPanel != null)
             playCardPanel.SetActive(show);
 
-        cardToPlay = card;
-        cardTarget = target;
+        if (show)
+        {
+            cardToPlay = card;
+            cardTarget = target;
 
-        if (cardToPlay != null && cardToPlayImage != null)
-            cardToPlayImage.sprite = cardToPlay.cardSprite;
-            
-        if (playCardPromptText != null && target != null)
-            playCardPromptText.text = $"Are you sure you want to play {cardToPlay?.cardName} on {target.TargetName}?";
+            if (cardToPlayImage != null)
+                cardToPlayImage.sprite = cardToPlay != null ? cardToPlay.cardSprite : null;
+
+            if (playCardPromptText != null)
+                playCardPromptText.text = (cardToPlay != null && target != null)
+                    ? $"Are you sure you want to play {cardToPlay.cardName} on {target.TargetName}?"
+                    : string.Empty;
+        }
+        else
+        {
+            // Clearing references when hiding ensures panel does not re-open with stale data
+            cardToPlay = null;
+            cardTarget = null;
+            if (cardToPlayImage != null) cardToPlayImage.sprite = null;
+            if (playCardPromptText != null) playCardPromptText.text = string.Empty;
+        }
     }
 
     
@@ -232,20 +248,20 @@ public class PlayerHandUI : MonoBehaviour
         
         Debug.Log($"PlayerHandUI.OnPlayCardYesClicked(): Playing card '{cardToPlay.cardName}' on target '{cardTarget.TargetName}'");
         
-        // Store references before clearing them
-        CardManager cardToPlayCopy = cardToPlay;
-        ICardTarget cardTargetCopy = cardTarget;
+        //Call PlayerManager's play card with the stored references
+        currentPlayer.PlayCard(cardToPlay, cardTarget);
+
+        if (currentPlayer != null) currentPlayer.SelectCard(null);
         
         ShowPlayCardPanel(false, null, null);   //hide play card (this clears cardToPlay and cardTarget)
-
-        //Call PlayerManager's play card with the stored references
-        currentPlayer.PlayCard(cardToPlayCopy, cardTargetCopy);
+        if (selectedCardOutline != null) selectedCardOutline.effectDistance = new Vector2(1, 1);
+        isCardSelected = false;
     }
 
     private void OnPlayCardNoClicked()
     {
         Debug.Log("Play card No button clicked");
-        ShowPlayCardPanel(false, cardToPlay, cardTarget);
+        ShowPlayCardPanel(false, null, null);
     }
 
     protected virtual void OnCardSelected(Sprite selectedCard, int cardIndex)
@@ -265,7 +281,7 @@ public class PlayerHandUI : MonoBehaviour
             if (card3Image == null) card3Image = playerHandPanel.transform.Find("Card3_Img")?.GetComponent<Image>();
             if (card4Image == null) card4Image = playerHandPanel.transform.Find("Card4_Img")?.GetComponent<Image>();
             if (selectedCardImage == null) selectedCardImage = playerHandPanel.transform.Find("SelectedCard")?.GetComponent<Image>();
-            if (selectedCardOutline == null) selectedCardOutline = selectedCardOutline.GetComponent<Outline>();
+            if (selectedCardOutline == null) selectedCardOutline = selectedCardImage != null ? selectedCardImage.GetComponent<Outline>() : null;
 
             if (previousButton == null) previousButton = playerHandPanel.transform.Find("Button_Previous")?.GetComponent<Button>();
             if (nextButton == null) nextButton = playerHandPanel.transform.Find("Button_Next")?.GetComponent<Button>();
@@ -278,8 +294,8 @@ public class PlayerHandUI : MonoBehaviour
         {
             if (playCardPromptText == null) playCardPromptText = playCardPanel.transform.Find("Prompt_Text")?.GetComponent<TextMeshProUGUI>();
             if(cardToPlayImage == null) cardToPlayImage = playCardPanel.transform.Find("CardToPlay_Image")?.GetComponent<Image>();
-            if (cardToPlayImage == null) playCardYesButton = playCardPanel.transform.Find("Yes_Button")?.GetComponent<Button>();
-            if (cardToPlayImage == null) playCardNoButton = playCardPanel.transform.Find("No_Button")?.GetComponent<Button>();
+            if (playCardYesButton == null) playCardYesButton = playCardPanel.transform.Find("Yes_Button")?.GetComponent<Button>();
+            if (playCardNoButton == null) playCardNoButton = playCardPanel.transform.Find("No_Button")?.GetComponent<Button>();
         }
     }
 

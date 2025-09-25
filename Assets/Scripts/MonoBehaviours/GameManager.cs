@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -28,6 +29,9 @@ public class GameManager : MonoBehaviour
     [SerializeField] private ApproachType[] playerApproaches;
     [SerializeField] private ApproachType[] unevenPlayerApproaches;
 
+    public GameObject gameOverPanel;
+    public TextMeshProUGUI messageText;
+
     void Awake()
     {
         if (Instance != null && Instance != this)
@@ -49,7 +53,7 @@ public class GameManager : MonoBehaviour
 
     // Start is left empty to avoid double-initialization
     void Start() {
-        
+        gameOverPanel.SetActive(false);
     }
 
     // Update is called once per frame
@@ -114,7 +118,46 @@ public class GameManager : MonoBehaviour
         }
 
         uiManager.multiplayerUI.Setup(players);
+        sharedResources.resources = startingResources;
     }
 
-   
+   public void CheckWinLoseConditions()
+    {
+        if (peacefulPoints+violentPoints > maxPeacefulPoints + maxViolentPoints / 1.5)  //too polarized
+        {
+            ShowGameEndPanel("You Loose! \n The movement became too polarized.");
+        }
+        else if(sharedResources.resources.GetTotalValue() <= 0)                             //no resources left
+        {
+            ShowGameEndPanel("You Loose! \n You ran out of resources.");
+        }
+
+        int influencedCountries = 0;
+        foreach (CountryManager country in countries)
+        {
+            if (country.isInfluenced) influencedCountries++;
+        }
+        if(influencedCountries > countries.Length/2)
+        {
+            ShowGameEndPanel("You Win! You influenced more than half of the countries!");
+        }
+
+        int influencedSectors = 0;
+        foreach (SectorManager sector in sectors)
+        {
+            if (sector.isInfluenced) influencedSectors++;
+        }
+
+        if (influencedSectors > sectors.Length/2)
+        {
+            ShowGameEndPanel("You Win! You influenced more than half of the sectors!");
+        }
+    }
+
+    private void ShowGameEndPanel(string message)
+    {
+        roundManager.EndPlayerTurn();
+        gameOverPanel.SetActive(true);
+        messageText.text = message + "\n \n Round: " + roundManager.currentRound + "Turns: " + roundManager.currentTurn;
+    }
 }
