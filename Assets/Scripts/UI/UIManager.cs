@@ -1,7 +1,5 @@
 using System;
 using TMPro;
-using TreeEditor;
-using Unity.Burst.Intrinsics;
 using UnityEngine;
 using UnityEngine.UI;
 using static UnityEngine.GraphicsBuffer;
