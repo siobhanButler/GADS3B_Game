@@ -176,7 +176,7 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
         }
 
         //If Influence goes above Influence threshold
-        if(currentInfluence > influenceThreshold) OnSectorInfluenced();
+        if(currentInfluence >= influenceThreshold) OnSectorInfluenced();
     }
 
     public void OnSectorInfluenced()    //when the total influence threshold is reached
@@ -219,7 +219,23 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
             // Last acting player gets 25% of the player portion (12.5% of total)
             if (lastPlayer != null) lastPlayer.personalResources += playerResources * 0.25f;
             if (lastPlayer == null) topPlayer.personalResources += playerResources * 0.25f;     // If no last player, give the 25% to the top player instead
-    }
+            
+            // Update UI for all players who received resources
+            UpdateResourceUIForPlayer(topPlayer);
+            if (lastPlayer != null && lastPlayer != topPlayer)
+            {
+                UpdateResourceUIForPlayer(lastPlayer);
+            }
+        }
+        
+        private void UpdateResourceUIForPlayer(PlayerManager player)
+        {
+            if (player != null && player.uiManager != null)
+            {
+                player.uiManager.UpdateResourcesUI();
+                Debug.Log($"SectorManager.UpdateResourceUIForPlayer(): Updated resource UI for {player.playerName}");
+            }
+        }
 
     public PlayerManager GetTopInfluencingPlayer()
     {
@@ -249,10 +265,8 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
     {
         return card.targetType == CardTargetType.Sector;
     }
-}
-
-/*
- *     string RecentActions(int amount)
+    
+    public string RecentActions(int amount)
     {
         string result = "";
         int count = Mathf.Min(amount, playerActions.Length);
@@ -260,10 +274,13 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
         for (int i = 0; i < count; i++)
         {
             if (i > 0) result += "\n";
-            result += playerActions[playerActions.Length - 1 - i].GetActionMessage();
-            result += "\n";
-            result += playerActions[playerActions.Length - 1 - i].card.description;
+            if (playerActions[playerActions.Length - 1 - i] != null)
+            {
+                result += playerActions[playerActions.Length - 1 - i].GetActionMessage();
+                result += "\n";
+                result += playerActions[playerActions.Length - 1 - i].card.description;
+            }
         }
         return result;
     }
- */
+}

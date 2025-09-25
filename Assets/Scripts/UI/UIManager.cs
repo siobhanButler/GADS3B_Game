@@ -11,7 +11,7 @@ public class UIManager : MonoBehaviour
     public RoundManager roundManager;
     public Resource personalResources;
     public ResourceManager sharedResources;
-    private PlayerManager currentPlayer;
+    public PlayerManager currentPlayer;
 
     [Header("Top Panel References")]
     [SerializeField] private GameObject topPanel;
@@ -126,6 +126,11 @@ public class UIManager : MonoBehaviour
         }
         //Debug.Log($"UIManager ShowPlayCardUI(): Showing play card UI: {show}, Card: {card?.cardName}");
         playerHandUI.ShowPlayCardPanel(show, card, target);
+
+        if (show)
+        {
+            ShowCraftingUI(false);
+        }
     }
 
     public void ShowCraftingUI(bool show)

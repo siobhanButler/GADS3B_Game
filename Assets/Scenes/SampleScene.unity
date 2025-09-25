@@ -674,7 +674,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerName: 
   playerID: 0
-  playerColor: {r: 0.79622644, g: 0, b: 0, a: 0}
+  playerColor: {r: 0.8, g: 0.19215687, b: 0.13725491, a: 1}
   preferredApproach: 1
   handManager: {fileID: 1167100489}
   personalResources:
@@ -996,6 +996,10 @@ PrefabInstance:
       propertyPath: roundManager
       value: 
       objectReference: {fileID: 833182951}
+    - target: {fileID: 3329240617966866464, guid: f2247489a99da50478d25052fb9ea959, type: 3}
+      propertyPath: currentPlayer
+      value: 
+      objectReference: {fileID: 1167100488}
     - target: {fileID: 3329240617966866464, guid: f2247489a99da50478d25052fb9ea959, type: 3}
       propertyPath: sharedResources
       value: 

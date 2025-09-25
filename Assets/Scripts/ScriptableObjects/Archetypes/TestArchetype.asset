@@ -16,16 +16,9 @@ MonoBehaviour:
   description: This is a test that does something
   colour: {r: 0.9169811, g: 0, b: 0, a: 0}
   sectorWeights:
-    government: 0
-    media: 0
-    economic: 0
-    social: 0
-    activism: 0
-  approachEffectiveness:
-    government: 0
-    media: 0
-    economic: 0
-    social: 0
-    activism: 0
-    universal: 0
+    government: 5
+    media: 5
+    economic: 5
+    social: 5
+    activism: 5
   notes: 

@@ -32,7 +32,18 @@ public class LocationCardManager : CardManager
         targetCountry = target.TargetCountryManager;
         if (targetCountry == null)
         {
-            Debug.Log("SingleTurnCardManager ApplyCardEffect(): Card can not find CountryManager");
+            Debug.Log("LocationCardManager ApplyCardEffect(): Card can not find CountryManager");
+            return;
         }
+        
+        // Create and add the player action to recent actions (if target is a sector)
+        if (target.TargetSectorManager != null)
+        {
+            PlayerAction action = new PlayerAction();
+            action.SetPlayerAction(ActionType.ActionCard, player, this);
+            target.TargetSectorManager.AddRecentAction(action);
+        }
+        
+        Debug.Log($"LocationCardManager.ApplyCardEffect(): Applied '{cardName}' to country '{targetCountry.countryName}'");
     }
 }

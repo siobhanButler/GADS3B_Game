@@ -78,6 +78,9 @@ public class CraftingManager : MonoBehaviour
             // Add card to player's hand
             player.AddCraftedCard(craftedCard);
             Debug.Log($"CraftingManager.CraftCard(): Card '{craftedCard.cardName}' sent to player '{player.playerName}'");
+            
+            // Update UI to reflect resource changes
+            UpdateResourceUI();
         }
         else
         {
@@ -179,6 +182,19 @@ public class CraftingManager : MonoBehaviour
             player.personalResources.legitimacy -= remainingLegitimacy;
             
             Debug.Log($"CraftingManager: Deducted remaining resources from personal: K:{remainingKnowledge}, M:{remainingMoney}, Me:{remainingMedia}, L:{remainingLabour}, S:{remainingSolidarity}, Le:{remainingLegitimacy}");
+        }
+    }
+
+    private void UpdateResourceUI()
+    {
+        if (player != null && player.uiManager != null)
+        {
+            player.uiManager.UpdateResourcesUI();
+            Debug.Log("CraftingManager.UpdateResourceUI(): Updated resource UI");
+        }
+        else
+        {
+            Debug.LogWarning("CraftingManager.UpdateResourceUI(): Cannot update UI - player or uiManager is null");
         }
     }
 

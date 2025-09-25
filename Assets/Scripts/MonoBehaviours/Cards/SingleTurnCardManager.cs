@@ -35,8 +35,16 @@ public class SingleTurnCardManager : CardManager
         if (targetSector == null)
         {
             Debug.Log("SingleTurnCardManager ApplyCardEffect(): Card can not find SectorManager");
+            return;
         }
 
+        // Create and add the player action to recent actions
+        PlayerAction action = new PlayerAction();
+        action.SetPlayerAction(ActionType.ActionCard, player, this);
+        targetSector.AddRecentAction(action);
+
         targetSector.AddInfluence(influenceToAdd, player, approach);
+        
+        Debug.Log($"SingleTurnCardManager.ApplyCardEffect(): Applied '{cardName}' to sector '{targetSector.sectorName}'");
     }
 }

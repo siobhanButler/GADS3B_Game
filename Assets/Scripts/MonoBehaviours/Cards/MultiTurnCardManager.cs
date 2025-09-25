@@ -55,7 +55,15 @@ public class MultiTurnCardManager : CardManager
             Debug.Log("MultiTurnCardManager ApplyCardEffect(): Card can not find SectorManager");
             return;
         }
+        
+        // Create and add the player action to recent actions
+        PlayerAction action = new PlayerAction();
+        action.SetPlayerAction(ActionType.ActionCard, pPlayer, this);
+        targetSector.AddRecentAction(action);
+        
         CardEffect();
+        
+        Debug.Log($"MultiTurnCardManager.ApplyCardEffect(): Applied '{cardName}' to sector '{targetSector.sectorName}'");
     }
 
     private void CardEffect()
@@ -89,6 +97,14 @@ public class MultiTurnCardManager : CardManager
         if (player.personalResources.CanAfford(costPerTurn))    //only charge player if they can afford it
         {
             player.personalResources -= costPerTurn;
+            
+            // Update UI to reflect resource changes
+            if (player.uiManager != null)
+            {
+                player.uiManager.UpdateResourcesUI();
+                Debug.Log("MultiTurnCardManager.ChargePlayer(): Updated resource UI");
+            }
+            
             return true;
         }
         return false;   //can not afford/ unsuccessful charge

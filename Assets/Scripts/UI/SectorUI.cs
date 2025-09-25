@@ -81,18 +81,44 @@ public class SectorUI : MonoBehaviour
     public void UpdateRecentActions()
     {
         if (selectedSector == null) return;
-        try { recentAction1Text.text = selectedSector.playerActions[0].GetActionMessage(); }
-            catch { recentAction1Text.text = ""; }
-        try { recentAction1DescrText.text = selectedSector.playerActions[0].card.description; } 
-            catch { recentAction1DescrText.text = ""; }
-        try { recentAction2Text.text = selectedSector.playerActions[1].GetActionMessage(); } 
-            catch { recentAction2Text.text = ""; }
-        try { recentAction2DescrText.text = selectedSector.playerActions[1].card.description; } 
-            catch { recentAction2DescrText.text = ""; }
-        try { recentAction3Text.text = selectedSector.playerActions[2].GetActionMessage(); } 
-            catch { recentAction3Text.text = ""; }
-        try { recentAction3DescrText.text = selectedSector.playerActions[2].card.description; } 
-            catch { recentAction3DescrText.text = ""; }
+        
+        // Update recent action 1
+        if (selectedSector.playerActions != null && selectedSector.playerActions.Length > 0 && selectedSector.playerActions[0] != null)
+        {
+            if (recentAction1Text != null) recentAction1Text.text = selectedSector.playerActions[0].GetActionMessage();
+            if (recentAction1DescrText != null) recentAction1DescrText.text = selectedSector.playerActions[0].card.description;
+        }
+        else
+        {
+            if (recentAction1Text != null) recentAction1Text.text = "";
+            if (recentAction1DescrText != null) recentAction1DescrText.text = "";
+        }
+        
+        // Update recent action 2
+        if (selectedSector.playerActions != null && selectedSector.playerActions.Length > 1 && selectedSector.playerActions[1] != null)
+        {
+            if (recentAction2Text != null) recentAction2Text.text = selectedSector.playerActions[1].GetActionMessage();
+            if (recentAction2DescrText != null) recentAction2DescrText.text = selectedSector.playerActions[1].card.description;
+        }
+        else
+        {
+            if (recentAction2Text != null) recentAction2Text.text = "";
+            if (recentAction2DescrText != null) recentAction2DescrText.text = "";
+        }
+        
+        // Update recent action 3
+        if (selectedSector.playerActions != null && selectedSector.playerActions.Length > 2 && selectedSector.playerActions[2] != null)
+        {
+            if (recentAction3Text != null) recentAction3Text.text = selectedSector.playerActions[2].GetActionMessage();
+            if (recentAction3DescrText != null) recentAction3DescrText.text = selectedSector.playerActions[2].card.description;
+        }
+        else
+        {
+            if (recentAction3Text != null) recentAction3Text.text = "";
+            if (recentAction3DescrText != null) recentAction3DescrText.text = "";
+        }
+        
+        Debug.Log($"SectorUI.UpdateRecentActions(): Updated recent actions for sector {selectedSector.sectorName}");
     }
     public void UpdateSectorResources()
     {

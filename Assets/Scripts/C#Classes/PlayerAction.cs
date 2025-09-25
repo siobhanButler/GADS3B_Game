@@ -27,7 +27,8 @@ public class PlayerAction
                 card = null;
                 return $"{player.playerName} crafted a card.";
             case ActionType.ActionCard:
-                return $"{player.playerName} played {card.cardName} on {card.target.TargetName}.";
+                try { return $"{player.playerName} played {card.cardName} on {card.target.TargetName}."; }
+                catch { return $"{player.playerName} played {card.cardName}."; }
             ;
             default:
                 return $"{player.playerName} is doing something unknown.";
