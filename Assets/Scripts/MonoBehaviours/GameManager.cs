@@ -6,6 +6,7 @@ public class GameManager : MonoBehaviour
 
     public RoundManager roundManager;
     public UIManager uiManager;
+    public EventManager eventManager;
 
     public ResourceManager sharedResources;
     public PlayerManager[] players;
@@ -61,6 +62,7 @@ public class GameManager : MonoBehaviour
     {
         if (roundManager == null) roundManager = FindFirstObjectByType<RoundManager>();
         if (uiManager == null) uiManager = FindFirstObjectByType<UIManager>();
+        if (eventManager == null) eventManager = FindFirstObjectByType<EventManager>();
 
         countries = FindObjectsByType<CountryManager>(FindObjectsSortMode.None);
         sectors = FindObjectsByType<SectorManager>(FindObjectsSortMode.None);
@@ -87,6 +89,7 @@ public class GameManager : MonoBehaviour
 
         roundManager.InitializeManagers(this, uiManager, players);
         uiManager.InitializeManagers(this, roundManager, players, sharedResources);
+        eventManager.Initialize(this);
 
         foreach (PlayerManager player in players)
         {

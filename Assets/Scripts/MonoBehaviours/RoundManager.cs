@@ -11,6 +11,9 @@ public class RoundManager : MonoBehaviour
     public delegate void NewRoundHandler(int roundNumber);
     public static event NewRoundHandler OnNewRound;
 
+    public delegate void NextPlayerHandler();       //might add (PlayerManager player) later
+    public static event NextPlayerHandler OnNextPlayer;
+
     public PlayerManager[] players;
     public PlayerManager currentPlayer;
     public int currentPlayerIndex;
@@ -166,6 +169,8 @@ public class RoundManager : MonoBehaviour
             uiManager.UpdateUIPerTurn();
             uiManager.EnableConfirmButton(true);
         }
+
+        OnNextPlayer?.Invoke();
     }
 
     // Called by the Confirm button
