@@ -163,6 +163,12 @@ public class PlayerHandUI : MonoBehaviour
             UpdateCardDisplay();
             Debug.Log($"PlayerHandUI.OnPreviousCardClicked(): Rotated to previous. New start index: {currentStartIndex}");
         }
+        if (isCardSelected)     //If a card is selected, but player is moving away, then Deselect card
+        {
+            if (currentPlayer != null) currentPlayer.SelectCard(null);
+            if (selectedCardOutline != null) selectedCardOutline.effectDistance = new Vector2(1, 1);
+            isCardSelected = false;
+        }
     }
     
     private void OnNextCardClicked()
@@ -173,6 +179,12 @@ public class PlayerHandUI : MonoBehaviour
             currentStartIndex = (currentStartIndex + 1) % cardsInHand.Count;
             UpdateCardDisplay();
             Debug.Log($"PlayerHandUI.OnNextCardClicked(): Rotated to next. New start index: {currentStartIndex}");
+        }
+        if (isCardSelected)     //If a card is selected, but player is moving away, then Deselect card
+        {
+            if (currentPlayer != null) currentPlayer.SelectCard(null);
+            if (selectedCardOutline != null) selectedCardOutline.effectDistance = new Vector2(1, 1);
+            isCardSelected = false;
         }
     }
 

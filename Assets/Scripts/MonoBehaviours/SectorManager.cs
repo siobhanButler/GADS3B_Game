@@ -45,10 +45,30 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
     public SectorManager TargetSectorManager => this;
     string description => $"This is the {sectorName} sector in {country.countryName}." + sectorType.Description; //description of the sector, can be expanded later
 
+    [Header("Managers")]
+    public GameManager gameManager;
+    public RoundManager roundManager;
+    public UIManager uiManager;
+
+    public void Initialize(GameManager pGameManager)
+    {
+        gameManager = pGameManager;
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         Setup();
+    }
+
+    void OnEnable()
+    {
+        RoundManager.OnNewRound += HandleNewRound;
+    }
+
+    void OnDisable()
+    {
+        RoundManager.OnNewRound -= HandleNewRound;
     }
 
     // Update is called once per frame
@@ -59,6 +79,7 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
 
     void Setup()
     {
+        //Default values
         isInfluenced = false;
         currentInfluence = 0f;
         playerInfluence = new Dictionary<PlayerManager, float>();
@@ -208,7 +229,7 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
         //RESOURCES
             //Give half of the resources to the shared resources 
             Resource sharedResources = grantedResources / 2.0f;         //50% of the resources
-            if (topPlayer.sharedResources != null)  topPlayer.sharedResources.resources += sharedResources;     //(all players have same shared resources)
+            if (gameManager.sharedResources != null)  gameManager.sharedResources.resources += sharedResources;
 
             //Give remaining half of the resources to the players
             Resource playerResources = grantedResources - sharedResources; //aka grantedResources/2
@@ -226,16 +247,35 @@ public class SectorManager : MonoBehaviour, IClickable, ICardTarget
             {
                 UpdateResourceUIForPlayer(lastPlayer);
             }
-        }
+    }
+
+    public void OnNewRound()    //every round the sector will grant 1/3 of the resources to the top influencing player
+    {
+        if(!isInfluenced) return;
         
-        private void UpdateResourceUIForPlayer(PlayerManager player)
+        PlayerManager topPlayer = GetTopInfluencingPlayer();
+        if (topPlayer == null) return;
+
+        Resource periodicGrant = grantedResources / 3.0f; // grant one-third each round
+        topPlayer.personalResources += periodicGrant;
+        
+        UpdateResourceUIForPlayer(topPlayer);
+        Debug.Log($"SectorManager.OnNewRound(): Granted {sectorName} round resources to {topPlayer.playerName}");
+    }
+
+    private void HandleNewRound(int roundNumber)
+    {
+        OnNewRound();
+    }
+
+    private void UpdateResourceUIForPlayer(PlayerManager player)
+    {
+        if (player != null && player.uiManager != null)
         {
-            if (player != null && player.uiManager != null)
-            {
-                player.uiManager.UpdateResourcesUI();
-                Debug.Log($"SectorManager.UpdateResourceUIForPlayer(): Updated resource UI for {player.playerName}");
-            }
+            player.uiManager.UpdateResourcesUI();
+            Debug.Log($"SectorManager.UpdateResourceUIForPlayer(): Updated resource UI for {player.playerName}");
         }
+    }
 
     public PlayerManager GetTopInfluencingPlayer()
     {

@@ -43,7 +43,7 @@
 - [ ] Add spatial audio for 3D positioning
 
 ### Input System Fix
-- [ ] Edit raycast system for proper UI interaction priority
+- [X] Edit raycast system for proper UI interaction priority
 - [ ] Implement UI → Sector → Country click hierarchy
 - [ ] Fix input blocking issues
 - [ ] Add proper input state management

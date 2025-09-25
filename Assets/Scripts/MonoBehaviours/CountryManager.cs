@@ -44,6 +44,14 @@ public class CountryManager : MonoBehaviour, IClickable, ICardTarget
     public CountryManager TargetCountryManager => this;
     public SectorManager TargetSectorManager => null;
 
+    [Header("Managers")]
+    public GameManager gameManager;
+
+    public void Initialize(GameManager pGameManager)
+    {
+        gameManager = pGameManager;
+    }
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {

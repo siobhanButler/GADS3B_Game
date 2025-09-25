@@ -9,9 +9,11 @@ public class UIManager : MonoBehaviour
 {
     public GameManager gameManager;
     public RoundManager roundManager;
+    public PlayerManager[] players;
+    public PlayerManager currentPlayer;
+
     public Resource personalResources;
     public ResourceManager sharedResources;
-    public PlayerManager currentPlayer;
 
     [Header("Top Panel References")]
     [SerializeField] private GameObject topPanel;
@@ -51,7 +53,7 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Button confirmButton;
     
     [Header("Other UI Managers")]
-    [SerializeField] private MultiplayerUI multiplayerUI;
+    [SerializeField] public MultiplayerUI multiplayerUI;
     [SerializeField] private CountryUI countryUI;
     [SerializeField] private SectorUI sectorUI;
     [SerializeField] public PlayerHandUI playerHandUI;
@@ -80,6 +82,14 @@ public class UIManager : MonoBehaviour
     private string cachedRoundText = "";
     private string cachedTurnText = "";
     private string cachedTimerText = "";
+
+    public void InitializeManagers(GameManager pGameManager, RoundManager pRoundManager, PlayerManager[] pPlayers, ResourceManager pSharedResources)
+    {
+        gameManager = pGameManager;
+        roundManager = pRoundManager;
+        players = pPlayers;
+        sharedResources = pSharedResources;
+    }
     
     private void Awake()
     {
@@ -104,6 +114,13 @@ public class UIManager : MonoBehaviour
         }
         //Debug.Log($"UIManager ShowSectorUI(): Showing sector UI: {show}, Sector: {sector?.sectorName}");
         sectorUI.ShowSectorPanel(show, sector);
+
+        // If showing crafting UI, hide other panels to avoid overlap
+        if (show)
+        {
+            ShowCountryUI(false, null);
+            ShowCraftingUI(false);
+        }
     }
 
     public void ShowCountryUI(bool show, CountryManager country)
@@ -115,6 +132,13 @@ public class UIManager : MonoBehaviour
         }
         //Debug.Log($"UIManager ShowCountryUI(): Showing country UI: {show}, Country: {country?.countryName}");
         countryUI.ShowCountryPanel(show, country);
+
+        // If showing crafting UI, hide other panels to avoid overlap
+        if (show)
+        {
+            ShowSectorUI(false, null);
+            ShowCraftingUI(false);
+        }
     }
 
     public void ShowPlayCardUI(bool show, CardManager card, ICardTarget target)
@@ -156,9 +180,8 @@ public class UIManager : MonoBehaviour
     public void UpdateUIPerTurn()
     {
         currentPlayer = roundManager.currentPlayer;
-        playerImage.color = currentPlayer.playerColor;
 
-        //UpdateTimer(roundManager.secondsPerRound)
+        UpdateTimer(roundManager.secondsPerTurn);
         UpdateRound(roundManager.currentRound);
         UpdateTurn(roundManager.currentTurn);
         craftButton.interactable = roundManager.canCraft;
@@ -168,6 +191,8 @@ public class UIManager : MonoBehaviour
 
         UpdatePeacefulSlider(gameManager.peacefulPoints / gameManager.maxPeacefulPoints);
         UpdateViolentSlider(gameManager.violentPoints / gameManager.maxViolentPoints);
+
+        multiplayerUI.UpdatePlayers(roundManager.currentPlayerIndex);
     }
 
     public void UpdateResourcesUI()
@@ -286,6 +311,12 @@ public class UIManager : MonoBehaviour
                 cachedTimerText = newTimerText;
                 timerText.text = cachedTimerText;
             }
+
+            if (currentSeconds <= 5)
+            {
+                timerText.color = Color.red;
+            }
+            else timerText.color = Color.black;
         }
     }
     
@@ -326,7 +357,8 @@ public class UIManager : MonoBehaviour
         if (violentSlider != null)
             violentSlider.value = value;
     }
-    
+
+// ============= BUTTON LISTENERS =============
 
     private void OnCraftButtonClicked()
     {
@@ -343,8 +375,23 @@ public class UIManager : MonoBehaviour
     private void OnConfirmButtonClicked()
     {
         Debug.Log("Confirm button clicked");
-        roundManager.NextTurn();
+        roundManager.OnConfirmPressed();
     }
+
+    public void EnableCraftButton(bool enable)
+    {
+        if (craftButton != null)
+            craftButton.interactable = enable;
+    }
+
+    public void EnableConfirmButton(bool enable)
+    {
+        if (confirmButton != null)
+            confirmButton.interactable = enable;
+    }
+
+
+    // ============= INITIALIZING AND SETUP FUNCTIONS =============
 
     private void InitializeReferences()
     {
